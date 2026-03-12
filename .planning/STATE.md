@@ -10,14 +10,14 @@ Users can convert credit card statements to Rydoo format without manual data ent
 
 ## Current Position
 
-**Current Phase:** 2 — PDF Parsing Infrastructure  
-**Current Plan:** 02-02  
-**Status:** Phase Complete (2/2 plans complete)
+**Current Phase:** 3 — Data Extraction  
+**Current Plan:** 03-01  
+**Status:** In Progress (1/2 plans complete)
 
 ### Phase Progress
 
 ```
-[████████░░░░░░░░░░░░] 40% Overall (2/5 phases completed)
+[██████████░░░░░░░░░░] 50% Overall (2.5/5 phases completed)
 ```
 
 **Phase Status:**
@@ -25,13 +25,13 @@ Users can convert credit card statements to Rydoo format without manual data ent
 |-------|----------|-------|
 | 1 - Project Setup | 100% | 🟢 Completed |
 | 2 - PDF Parsing Infrastructure | 100% | 🟢 Completed |
-| 3 - Data Extraction | 0% | 🔵 Not Started |
+| 3 - Data Extraction | 50% | 🟡 In Progress |
 | 4 - Excel Generation | 0% | 🔵 Not Started |
 | 5 - CLI Interface and Integration | 0% | 🔵 Not Started |
 
 ## Current Focus
 
-**Immediate Next Step:** Execute 03-01-PLAN.md — Data Extraction Implementation
+**Immediate Next Step:** Execute 03-02-PLAN.md — Amount Parser and Transaction Row Extraction
 
 **Phase 2 Complete:** ✓ PDF Parsing Infrastructure
 
@@ -51,10 +51,10 @@ Users can convert credit card statements to Rydoo format without manual data ent
 
 | Metric                 | Value | Target |
 | ---------------------- | ----- | ------ |
-| Phases Completed       | 2/5   | 5      |
-| Requirements Delivered | 5/21  | 21     |
-| Success Criteria Met   | 8/23  | 23     |
-| Plans Completed        | 4/7   | 7      |
+| Phases Completed       | 2.5/5 | 5      |
+| Requirements Delivered | 8/21  | 21     |
+| Success Criteria Met   | 13/23 | 23     |
+| Plans Completed        | 5/7   | 7      |
 | Days Since Start       | 0     | -      |
 
 ## Accumulated Context
@@ -66,7 +66,10 @@ Users can convert credit card statements to Rydoo format without manual data ent
 3. **Structured types for multi-page support**: Created PdfPage interface with pageNumber and text fields to support per-page content extraction (PARSE-03).
 4. **Abstract class for parser base**: Used `abstract class BaseParser` instead of interface to provide shared utility methods (findFirstMatch, extractBetweenMarkers) to all bank parsers.
 5. **Multiple regex patterns for robust extraction**: Implemented primary + alternative + fallback regex patterns for card number extraction to handle BNP PDF format variations.
-6. **Phase separation for transaction parsing**: Phase 2 identifies table boundaries and returns raw section text. Phase 3 will implement row-by-row transaction parsing. This separates section identification from content parsing.
+6. **Phase separation for transaction parsing**: Phase 2 identifies table boundaries and returns raw section text. Phase 3 implements row-by-row transaction parsing. This separates section identification from content parsing.
+7. **Accent-free French month variants**: Added fevrier, aout, decembre variants in FRENCH_MONTHS alongside accented versions for robustness against PDF text extraction variations.
+8. **M/D/YYYY date format**: Confirmed Rydoo expects M/D/YYYY format (no leading zeros) for transaction dates.
+9. **Readonly constant pattern**: Used `Readonly<Record<string, number>>` for FRENCH_MONTHS to ensure immutability at compile time.
 
 ### Open Questions
 
@@ -122,29 +125,28 @@ statement-convertor/
 
 ### Last Session
 
-2026-03-12 - Completed 02-02-PLAN.md (BNP Parser Implementation)
+2026-03-12 - Completed 03-01-PLAN.md (Transaction Types and Date Parsing)
 
-- Created transaction type definitions (RawTransaction, ParserResult, BankParser)
-- Implemented BaseParser abstract class with Strategy pattern (ARCH-03)
-- Built BnpParser with card number extraction and table boundary detection
-- Updated parser index with clean exports
-- Phase 2 PDF Parsing Infrastructure complete
+- Added Transaction interface with Date and number types
+- Created French date parser supporting all 12 months
+- Implemented parseFrenchDate(), formatDateMDY(), parseAndFormatFrenchDate()
+- Added comprehensive test suite (25 tests)
+- All tests pass successfully
 
 ### Current Work
 
-Phase 2: PDF Parsing Infrastructure - ✓ Complete
+Phase 3: Data Extraction - 50% Complete
 
-- PDF text extraction foundation ready
-- BNP parser with card extraction and table identification ready
-- Ready for Phase 3: Data Extraction
+- ✓ Transaction interface with typed fields
+- ✓ French date parsing infrastructure
+- ⏳ Amount parsing and transaction row extraction (next)
 
 ### Next Actions
 
-1. Execute 03-01-PLAN.md — Transaction Data Extraction
-2. Parse individual transaction rows from table section
-3. Convert French dates to M/D/YYYY format (EXTRACT-05)
-4. Parse amounts with comma decimal separator (EXTRACT-03)
-5. Detect and extract foreign currency codes (EXTRACT-04)
+1. Execute 03-02-PLAN.md — Amount Parser and Transaction Row Extraction
+2. Parse amounts with comma decimal separator (EXTRACT-03)
+3. Detect and extract foreign currency codes (EXTRACT-04)
+4. Extract transaction rows from table section text
 
 ### Files in Progress
 
@@ -179,7 +181,7 @@ _No files currently being worked on._
 
 ### Phase 4 Entry (Prerequisites)
 
-- [ ] Date parsing works
+- [x] Date parsing works
 - [ ] Amount parsing works
 - [ ] Transaction objects created
 
