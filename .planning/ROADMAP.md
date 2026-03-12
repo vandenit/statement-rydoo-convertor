@@ -117,6 +117,13 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 - EXCEL-04: Set AccountCurrency to EUR
 - EXCEL-05: AccountAmount equals Amount for EUR transactions
 
+**Plans:** 2 plans in 2 waves
+
+**Plan List:**
+
+- [ ] 04-01-PLAN.md — Install xlsx, create ExcelGenerator class
+- [ ] 04-02-PLAN.md — Add tests for Excel generation and Rydoo compatibility
+
 **Success Criteria:**
 
 1. System generates .xlsx file that Rydoo can import without errors
