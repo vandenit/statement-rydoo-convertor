@@ -57,56 +57,58 @@
 
 ## Out of Scope
 
-| Feature | Reason |
-|---------|--------|
-| GUI/web interface | CLI-only for v1, planned for v2 |
-| Direct Rydoo API upload | Excel export sufficient, API adds complexity |
-| Automatic bank detection | User specifies --bank, planned for v2 |
-| Manual transaction editing | Process all transactions as-is |
-| Support for non-Belgian banks | Focus on BNP first, expand later |
+| Feature                       | Reason                                       |
+| ----------------------------- | -------------------------------------------- |
+| GUI/web interface             | CLI-only for v1, planned for v2              |
+| Direct Rydoo API upload       | Excel export sufficient, API adds complexity |
+| Automatic bank detection      | User specifies --bank, planned for v2        |
+| Manual transaction editing    | Process all transactions as-is               |
+| Support for non-Belgian banks | Focus on BNP first, expand later             |
 
 ## Traceability
 
-| Requirement | Phase | Status |
-|-------------|-------|--------|
-| PARSE-01 | Phase 2 | Pending |
-| PARSE-02 | Phase 2 | Pending |
-| PARSE-03 | Phase 2 | Pending |
-| PARSE-04 | Phase 2 | Pending |
-| EXTRACT-01 | Phase 3 | Pending |
-| EXTRACT-02 | Phase 3 | Pending |
-| EXTRACT-03 | Phase 3 | Pending |
-| EXTRACT-04 | Phase 3 | Pending |
-| EXTRACT-05 | Phase 3 | Pending |
-| EXCEL-01 | Phase 4 | Pending |
-| EXCEL-02 | Phase 4 | Pending |
-| EXCEL-03 | Phase 4 | Pending |
-| EXCEL-04 | Phase 4 | Pending |
-| EXCEL-05 | Phase 4 | Pending |
-| CLI-01 | Phase 5 | Pending |
-| CLI-02 | Phase 5 | Pending |
-| CLI-03 | Phase 5 | Pending |
-| CLI-04 | Phase 5 | Pending |
-| CLI-05 | Phase 5 | Pending |
-| ARCH-01 | Phase 1 | Complete |
-| ARCH-02 | Phase 1 | Complete |
-| ARCH-03 | Phase 5 | Pending |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
+| PARSE-01    | Phase 2 | Complete |
+| PARSE-02    | Phase 2 | Complete |
+| PARSE-03    | Phase 2 | Complete |
+| PARSE-04    | Phase 2 | Complete |
+| EXTRACT-01  | Phase 3 | Pending  |
+| EXTRACT-02  | Phase 3 | Pending  |
+| EXTRACT-03  | Phase 3 | Pending  |
+| EXTRACT-04  | Phase 3 | Pending  |
+| EXTRACT-05  | Phase 3 | Pending  |
+| EXCEL-01    | Phase 4 | Pending  |
+| EXCEL-02    | Phase 4 | Pending  |
+| EXCEL-03    | Phase 4 | Pending  |
+| EXCEL-04    | Phase 4 | Pending  |
+| EXCEL-05    | Phase 4 | Pending  |
+| CLI-01      | Phase 5 | Pending  |
+| CLI-02      | Phase 5 | Pending  |
+| CLI-03      | Phase 5 | Pending  |
+| CLI-04      | Phase 5 | Pending  |
+| CLI-05      | Phase 5 | Pending  |
+| ARCH-01     | Phase 1 | Complete |
+| ARCH-02     | Phase 1 | Complete |
+| ARCH-03     | Phase 5 | Pending  |
 
 **Coverage:**
+
 - v1 requirements: 21 total
 - Mapped to phases: 21
 - Unmapped: 0 ✓
 
 ### Phase Summary
 
-| Phase | Requirements | Description |
-|-------|--------------|-------------|
-| Phase 1 | ARCH-01, ARCH-02 | Project Setup — TypeScript toolchain and npm package |
-| Phase 2 | PARSE-01 to PARSE-04 | PDF Parsing Infrastructure — text extraction and table parsing |
-| Phase 3 | EXTRACT-01 to EXTRACT-05 | Data Extraction — structured transaction objects |
-| Phase 4 | EXCEL-01 to EXCEL-05 | Excel Generation — Rydoo-compatible .xlsx output |
+| Phase   | Requirements              | Description                                                          |
+| ------- | ------------------------- | -------------------------------------------------------------------- |
+| Phase 1 | ARCH-01, ARCH-02          | Project Setup — TypeScript toolchain and npm package                 |
+| Phase 2 | PARSE-01 to PARSE-04      | PDF Parsing Infrastructure — text extraction and table parsing       |
+| Phase 3 | EXTRACT-01 to EXTRACT-05  | Data Extraction — structured transaction objects                     |
+| Phase 4 | EXCEL-01 to EXCEL-05      | Excel Generation — Rydoo-compatible .xlsx output                     |
 | Phase 5 | CLI-01 to CLI-05, ARCH-03 | CLI Interface and Integration — folder workflow and strategy pattern |
 
 ---
-*Requirements defined: 2025-03-12*
-*Last updated: 2025-03-12 after CLI interface adjustment*
+
+_Requirements defined: 2025-03-12_
+_Last updated: 2025-03-12 after CLI interface adjustment_

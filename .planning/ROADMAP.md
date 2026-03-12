@@ -48,8 +48,8 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 **Plan List:**
 
-- [ ] 02-01-PLAN.md — Install pdf-parse, create PDF parser infrastructure and types
-- [ ] 02-02-PLAN.md — Implement BNP parser with card number extraction and transaction table identification
+- [x] 02-01-PLAN.md — Install pdf-parse, create PDF parser infrastructure and types
+- [x] 02-02-PLAN.md — Implement BNP parser with card number extraction and transaction table identification
 
 **Requirements:**
 
@@ -155,7 +155,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 | Phase                             | Status         | Started    | Completed  |
 | --------------------------------- | -------------- | ---------- | ---------- |
 | 1 - Project Setup                 | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
-| 2 - PDF Parsing Infrastructure    | 🔵 Not Started | -          | -          |
+| 2 - PDF Parsing Infrastructure    | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
 | 3 - Data Extraction               | 🔵 Not Started | -          | -          |
 | 4 - Excel Generation              | 🔵 Not Started | -          | -          |
 | 5 - CLI Interface and Integration | 🔵 Not Started | -          | -          |
