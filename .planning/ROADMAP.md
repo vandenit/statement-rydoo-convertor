@@ -3,7 +3,7 @@
 **Created:** 2025-03-12  
 **Depth:** Quick  
 **Phases:** 5  
-**Requirements:** 21 v1 requirements  
+**Requirements:** 21 v1 requirements
 
 ## Overview
 
@@ -18,14 +18,17 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 **Plans:** 2 plans
 
 **Plan List:**
+
 - [x] 01-01-PLAN.md — Initialize npm project, configure TypeScript, create folder structure
 - [x] 01-02-PLAN.md — Install dependencies, create CLI entry point, configure build scripts and tooling
 
 **Requirements:**
+
 - ARCH-01: TypeScript implementation
 - ARCH-02: Installable via npm
 
 **Success Criteria:**
+
 1. Developer can clone repository and run `npm install` successfully
 2. Developer can run `npm run build` to compile TypeScript without errors
 3. Developer can run `npm run dev` to execute CLI in development mode
@@ -41,13 +44,22 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 **Dependencies:** Phase 1 (Project Setup)
 
+**Plans:** 2 plans in 2 waves
+
+**Plan List:**
+
+- [ ] 02-01-PLAN.md — Install pdf-parse, create PDF parser infrastructure and types
+- [ ] 02-02-PLAN.md — Implement BNP parser with card number extraction and transaction table identification
+
 **Requirements:**
+
 - PARSE-01: Parse BNP Paribas Fortis PDF credit card statements
 - PARSE-02: Extract transaction table with date, description, amount columns
 - PARSE-03: Handle multi-page PDFs
 - PARSE-04: Extract card number from PDF header (not filename)
 
 **Success Criteria:**
+
 1. System can parse single-page BNP PDF and extract raw text content
 2. System can identify transaction table boundaries in parsed text
 3. System handles multi-page PDFs without losing transaction data
@@ -65,6 +77,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 **Dependencies:** Phase 2 (PDF Parsing Infrastructure)
 
 **Requirements:**
+
 - EXTRACT-01: Extract transaction date (Date de transaction)
 - EXTRACT-02: Extract merchant name (Description)
 - EXTRACT-03: Extract amount in EUR
@@ -72,6 +85,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 - EXTRACT-05: Format dates as M/D/YYYY
 
 **Success Criteria:**
+
 1. System extracts "Date de transaction" field and converts to M/D/YYYY format
 2. System extracts "Description" field as merchant name
 3. System extracts EUR amount, handling comma as decimal separator
@@ -89,6 +103,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 **Dependencies:** Phase 3 (Data Extraction)
 
 **Requirements:**
+
 - EXCEL-01: Generate Rydoo-compatible .xlsx format
 - EXCEL-02: Map to columns: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount
 - EXCEL-03: Use card number from PDF (last 4 digits)
@@ -96,6 +111,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 - EXCEL-05: AccountAmount equals Amount for EUR transactions
 
 **Success Criteria:**
+
 1. System generates .xlsx file that Rydoo can import without errors
 2. Excel contains all 7 required columns in correct order (A-G)
 3. CardNumber column shows last 4 digits extracted from PDF header
@@ -113,6 +129,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 **Dependencies:** Phase 4 (Excel Generation)
 
 **Requirements:**
+
 - CLI-01: Read PDFs from input/ folder automatically
 - CLI-02: Move processed PDFs to processed/ folder
 - CLI-03: Write Excel output to output/ folder
@@ -121,6 +138,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 - ARCH-03: Extensible parser interface (strategy pattern) for future banks
 
 **Success Criteria:**
+
 1. User can run `statement-convertor` and it processes all PDFs in input/ folder
 2. After processing, PDFs are moved from input/ to processed/ folder
 3. Generated Excel files appear in output/ folder with timestamped filenames
@@ -134,15 +152,16 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 ## Progress
 
-| Phase | Status | Started | Completed |
-|-------|--------|---------|-----------|
-| 1 - Project Setup | 🟢 Completed | 2025-03-12 | 2025-03-12 |
-| 2 - PDF Parsing Infrastructure | 🔵 Not Started | - | - |
-| 3 - Data Extraction | 🔵 Not Started | - | - |
-| 4 - Excel Generation | 🔵 Not Started | - | - |
-| 5 - CLI Interface and Integration | 🔵 Not Started | - | - |
+| Phase                             | Status         | Started    | Completed  |
+| --------------------------------- | -------------- | ---------- | ---------- |
+| 1 - Project Setup                 | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
+| 2 - PDF Parsing Infrastructure    | 🔵 Not Started | -          | -          |
+| 3 - Data Extraction               | 🔵 Not Started | -          | -          |
+| 4 - Excel Generation              | 🔵 Not Started | -          | -          |
+| 5 - CLI Interface and Integration | 🔵 Not Started | -          | -          |
 
 **Legend:**
+
 - 🔵 Not Started
 - 🟡 In Progress
 - 🟢 Completed
@@ -152,32 +171,33 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 ## Requirement Coverage
 
-| Requirement | Phase | Description |
-|-------------|-------|-------------|
-| PARSE-01 | 2 | Parse BNP Paribas Fortis PDF credit card statements |
-| PARSE-02 | 2 | Extract transaction table with date, description, amount columns |
-| PARSE-03 | 2 | Handle multi-page PDFs |
-| PARSE-04 | 2 | Extract card number from PDF header (not filename) |
-| EXTRACT-01 | 3 | Extract transaction date (Date de transaction) |
-| EXTRACT-02 | 3 | Extract merchant name (Description) |
-| EXTRACT-03 | 3 | Extract amount in EUR |
-| EXTRACT-04 | 3 | Extract original currency for foreign transactions |
-| EXTRACT-05 | 3 | Format dates as M/D/YYYY |
-| EXCEL-01 | 4 | Generate Rydoo-compatible .xlsx format |
-| EXCEL-02 | 4 | Map to columns: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount |
-| EXCEL-03 | 4 | Use card number from PDF (last 4 digits) |
-| EXCEL-04 | 4 | Set AccountCurrency to EUR |
-| EXCEL-05 | 4 | AccountAmount equals Amount for EUR transactions |
-| CLI-01 | 5 | Read PDFs from input/ folder automatically |
-| CLI-02 | 5 | Move processed PDFs to processed/ folder |
-| CLI-03 | 5 | Write Excel output to output/ folder |
-| CLI-04 | 5 | Support --bank flag (default: bnp) |
-| CLI-05 | 5 | Show progress and summary after processing |
-| ARCH-01 | 1 | TypeScript implementation |
-| ARCH-02 | 1 | Installable via npm |
-| ARCH-03 | 5 | Extensible parser interface (strategy pattern) for future banks |
+| Requirement | Phase | Description                                                                                                 |
+| ----------- | ----- | ----------------------------------------------------------------------------------------------------------- |
+| PARSE-01    | 2     | Parse BNP Paribas Fortis PDF credit card statements                                                         |
+| PARSE-02    | 2     | Extract transaction table with date, description, amount columns                                            |
+| PARSE-03    | 2     | Handle multi-page PDFs                                                                                      |
+| PARSE-04    | 2     | Extract card number from PDF header (not filename)                                                          |
+| EXTRACT-01  | 3     | Extract transaction date (Date de transaction)                                                              |
+| EXTRACT-02  | 3     | Extract merchant name (Description)                                                                         |
+| EXTRACT-03  | 3     | Extract amount in EUR                                                                                       |
+| EXTRACT-04  | 3     | Extract original currency for foreign transactions                                                          |
+| EXTRACT-05  | 3     | Format dates as M/D/YYYY                                                                                    |
+| EXCEL-01    | 4     | Generate Rydoo-compatible .xlsx format                                                                      |
+| EXCEL-02    | 4     | Map to columns: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount |
+| EXCEL-03    | 4     | Use card number from PDF (last 4 digits)                                                                    |
+| EXCEL-04    | 4     | Set AccountCurrency to EUR                                                                                  |
+| EXCEL-05    | 4     | AccountAmount equals Amount for EUR transactions                                                            |
+| CLI-01      | 5     | Read PDFs from input/ folder automatically                                                                  |
+| CLI-02      | 5     | Move processed PDFs to processed/ folder                                                                    |
+| CLI-03      | 5     | Write Excel output to output/ folder                                                                        |
+| CLI-04      | 5     | Support --bank flag (default: bnp)                                                                          |
+| CLI-05      | 5     | Show progress and summary after processing                                                                  |
+| ARCH-01     | 1     | TypeScript implementation                                                                                   |
+| ARCH-02     | 1     | Installable via npm                                                                                         |
+| ARCH-03     | 5     | Extensible parser interface (strategy pattern) for future banks                                             |
 
 **Coverage Summary:**
+
 - Total v1 requirements: 21
 - Mapped to phases: 21
 - Orphaned: 0 ✓
@@ -213,4 +233,4 @@ Linear dependency chain — each phase builds on the previous.
 
 ---
 
-*Last updated: 2025-03-12*
+_Last updated: 2025-03-12_
