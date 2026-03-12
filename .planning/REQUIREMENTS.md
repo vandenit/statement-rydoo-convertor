@@ -69,33 +69,43 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PARSE-01 | Phase 1 | Pending |
-| PARSE-02 | Phase 1 | Pending |
-| PARSE-03 | Phase 1 | Pending |
-| PARSE-04 | Phase 1 | Pending |
-| EXTRACT-01 | Phase 2 | Pending |
-| EXTRACT-02 | Phase 2 | Pending |
-| EXTRACT-03 | Phase 2 | Pending |
-| EXTRACT-04 | Phase 2 | Pending |
-| EXTRACT-05 | Phase 2 | Pending |
-| EXCEL-01 | Phase 3 | Pending |
-| EXCEL-02 | Phase 3 | Pending |
-| EXCEL-03 | Phase 3 | Pending |
-| EXCEL-04 | Phase 3 | Pending |
-| EXCEL-05 | Phase 3 | Pending |
-| CLI-01 | Phase 4 | Pending |
-| CLI-02 | Phase 4 | Pending |
-| CLI-03 | Phase 4 | Pending |
-| CLI-04 | Phase 4 | Pending |
-| CLI-05 | Phase 4 | Pending |
-| ARCH-01 | Phase 5 | Pending |
-| ARCH-02 | Phase 5 | Pending |
+| PARSE-01 | Phase 2 | Pending |
+| PARSE-02 | Phase 2 | Pending |
+| PARSE-03 | Phase 2 | Pending |
+| PARSE-04 | Phase 2 | Pending |
+| EXTRACT-01 | Phase 3 | Pending |
+| EXTRACT-02 | Phase 3 | Pending |
+| EXTRACT-03 | Phase 3 | Pending |
+| EXTRACT-04 | Phase 3 | Pending |
+| EXTRACT-05 | Phase 3 | Pending |
+| EXCEL-01 | Phase 4 | Pending |
+| EXCEL-02 | Phase 4 | Pending |
+| EXCEL-03 | Phase 4 | Pending |
+| EXCEL-04 | Phase 4 | Pending |
+| EXCEL-05 | Phase 4 | Pending |
+| CLI-01 | Phase 5 | Pending |
+| CLI-02 | Phase 5 | Pending |
+| CLI-03 | Phase 5 | Pending |
+| CLI-04 | Phase 5 | Pending |
+| CLI-05 | Phase 5 | Pending |
+| ARCH-01 | Phase 1 | Pending |
+| ARCH-02 | Phase 1 | Pending |
 | ARCH-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 21 total
 - Mapped to phases: 21
 - Unmapped: 0 ✓
+
+### Phase Summary
+
+| Phase | Requirements | Description |
+|-------|--------------|-------------|
+| Phase 1 | ARCH-01, ARCH-02 | Project Setup — TypeScript toolchain and npm package |
+| Phase 2 | PARSE-01 to PARSE-04 | PDF Parsing Infrastructure — text extraction and table parsing |
+| Phase 3 | EXTRACT-01 to EXTRACT-05 | Data Extraction — structured transaction objects |
+| Phase 4 | EXCEL-01 to EXCEL-05 | Excel Generation — Rydoo-compatible .xlsx output |
+| Phase 5 | CLI-01 to CLI-05, ARCH-03 | CLI Interface and Integration — folder workflow and strategy pattern |
 
 ---
 *Requirements defined: 2025-03-12*
