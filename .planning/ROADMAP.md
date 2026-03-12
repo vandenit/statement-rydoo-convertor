@@ -80,8 +80,8 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 **Plan List:**
 
-- [ ] 03-01-PLAN.md — Create Transaction type and French date parser utility
-- [ ] 03-02-PLAN.md — Implement amount parser and transaction row extraction
+- [x] 03-01-PLAN.md — Create Transaction type and French date parser utility
+- [x] 03-02-PLAN.md — Implement amount parser and transaction row extraction
 
 **Requirements:**
 
@@ -121,8 +121,8 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 **Plan List:**
 
-- [ ] 04-01-PLAN.md — Install xlsx, create ExcelGenerator class
-- [ ] 04-02-PLAN.md — Add tests for Excel generation and Rydoo compatibility
+- [x] 04-01-PLAN.md — Install xlsx, create ExcelGenerator class
+- [x] 04-02-PLAN.md — Add tests for Excel generation and Rydoo compatibility
 
 **Success Criteria:**
 
@@ -170,8 +170,8 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 | --------------------------------- | -------------- | ---------- | ---------- |
 | 1 - Project Setup                 | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
 | 2 - PDF Parsing Infrastructure    | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
-| 3 - Data Extraction               | 🔵 Not Started | -          | -          |
-| 4 - Excel Generation              | 🔵 Not Started | -          | -          |
+| 3 - Data Extraction               | 🟢 Completed   | 2026-03-12 | 2026-03-12 |
+| 4 - Excel Generation              | 🟢 Completed   | 2026-03-12 | 2026-03-12 |
 | 5 - CLI Interface and Integration | 🔵 Not Started | -          | -          |
 
 **Legend:**

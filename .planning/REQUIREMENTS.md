@@ -14,19 +14,19 @@
 
 ### Data Extraction
 
-- [ ] **EXTRACT-01**: Extract transaction date (Date de transaction)
-- [ ] **EXTRACT-02**: Extract merchant name (Description)
-- [ ] **EXTRACT-03**: Extract amount in EUR
-- [ ] **EXTRACT-04**: Extract original currency for foreign transactions
-- [ ] **EXTRACT-05**: Format dates as M/D/YYYY
+- [x] **EXTRACT-01**: Extract transaction date (Date de transaction)
+- [x] **EXTRACT-02**: Extract merchant name (Description)
+- [x] **EXTRACT-03**: Extract amount in EUR
+- [x] **EXTRACT-04**: Extract original currency for foreign transactions
+- [x] **EXTRACT-05**: Format dates as M/D/YYYY
 
 ### Excel Generation
 
-- [ ] **EXCEL-01**: Generate Rydoo-compatible .xlsx format
-- [ ] **EXCEL-02**: Map to columns: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount
-- [ ] **EXCEL-03**: Use card number from PDF (last 4 digits)
-- [ ] **EXCEL-04**: Set AccountCurrency to EUR
-- [ ] **EXCEL-05**: AccountAmount equals Amount for EUR transactions
+- [x] **EXCEL-01**: Generate Rydoo-compatible .xlsx format
+- [x] **EXCEL-02**: Map to columns: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount
+- [x] **EXCEL-03**: Use card number from PDF (last 4 digits)
+- [x] **EXCEL-04**: Set AccountCurrency to EUR
+- [x] **EXCEL-05**: AccountAmount equals Amount for EUR transactions
 
 ### CLI Interface
 
@@ -73,16 +73,16 @@
 | PARSE-02    | Phase 2 | Complete |
 | PARSE-03    | Phase 2 | Complete |
 | PARSE-04    | Phase 2 | Complete |
-| EXTRACT-01  | Phase 3 | Pending  |
-| EXTRACT-02  | Phase 3 | Pending  |
-| EXTRACT-03  | Phase 3 | Pending  |
-| EXTRACT-04  | Phase 3 | Pending  |
-| EXTRACT-05  | Phase 3 | Pending  |
-| EXCEL-01    | Phase 4 | Pending  |
-| EXCEL-02    | Phase 4 | Pending  |
-| EXCEL-03    | Phase 4 | Pending  |
-| EXCEL-04    | Phase 4 | Pending  |
-| EXCEL-05    | Phase 4 | Pending  |
+| EXTRACT-01  | Phase 3 | Complete |
+| EXTRACT-02  | Phase 3 | Complete |
+| EXTRACT-03  | Phase 3 | Complete |
+| EXTRACT-04  | Phase 3 | Complete |
+| EXTRACT-05  | Phase 3 | Complete |
+| EXCEL-01    | Phase 4 | Complete |
+| EXCEL-02    | Phase 4 | Complete |
+| EXCEL-03    | Phase 4 | Complete |
+| EXCEL-04    | Phase 4 | Complete |
+| EXCEL-05    | Phase 4 | Complete |
 | CLI-01      | Phase 5 | Pending  |
 | CLI-02      | Phase 5 | Pending  |
 | CLI-03      | Phase 5 | Pending  |
