@@ -20,8 +20,9 @@ Users can convert credit card statements to Rydoo format without manual data ent
 - [ ] Extract transaction data: date, merchant, amount, currency
 - [ ] Extract card number from PDF header (not filename)
 - [ ] Generate Rydoo-compatible Excel (.xlsx) with correct column mapping
-- [ ] Support multiple PDF input (single file, glob, or directory)
-- [ ] Folder workflow: input/ → processed/ + output/
+- [ ] Folder-based workflow: read PDFs from input/ folder
+- [ ] Move processed PDFs to processed/ folder
+- [ ] Write Excel output to output/ folder
 - [ ] Date format: M/D/YYYY exactly as Rydoo expects
 - [ ] Handle foreign currency transactions (original + EUR amounts)
 - [ ] CLI with --bank flag (default: bnp) for extensibility
