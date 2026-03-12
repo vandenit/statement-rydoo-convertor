@@ -8,16 +8,17 @@
  * - PARSE-01: Parse BNP Paribas Fortis PDF credit card statements
  * - PARSE-02: Extract transaction table boundaries
  * - PARSE-04: Extract card number from PDF header
+ * - EXTRACT-01: Extract transaction date
+ * - EXTRACT-02: Extract merchant name
+ * - EXTRACT-03: Extract amount in EUR
+ * - EXTRACT-04: Extract original currency
  */
 
 import { PdfContent } from '../types/pdf.js';
-import {
-  BaseParser,
-  ParserResult,
-  RawTransaction,
-  TransactionTableBounds,
-  CardNumberInfo,
-} from './base-parser.js';
+import { Transaction } from '../types/transaction.js';
+import { parseFrenchDate } from '../extractors/date-parser.js';
+import { parseAmountWithCurrency, isExchangeRateLine } from '../extractors/amount-parser.js';
+import { BaseParser, ParserResult, TransactionTableBounds, CardNumberInfo } from './base-parser.js';
 
 /**
  * BNP Paribas Fortis credit card statement parser
@@ -234,18 +235,175 @@ export class BnpParser extends BaseParser {
   }
 
   /**
-   * Extract raw transactions from the transaction table section
+   * Extract transactions from the transaction table section
    *
-   * Phase 2: Returns empty array - table section identification only
-   * Phase 3: Will implement full row parsing to extract individual transactions
+   * Parses individual transaction rows from the table text.
+   * Handles multi-line transactions (foreign currency with exchange rate).
+   *
+   * Table format:
+   * ```
+   * Date de transaction | Description | Montant en euros
+   * 12 mars 2024        | AMAZON EU   | -19,00
+   * 15 mars 2024        | FOREIGN     | -45,00 USD
+   *                     | Taux: 1.08  |
+   * ```
    *
    * @param tableText - Text content of the transaction table section
-   * @returns Array of RawTransaction objects (empty for Phase 2)
+   * @returns Array of Transaction objects with parsed date, description, amount
    */
-  protected extractTransactions(tableText: string): RawTransaction[] {
-    // Phase 2: Transaction identification only
-    // The tableText is returned in rawText for Phase 3 processing
-    return [];
+  protected extractTransactions(tableText: string): Transaction[] {
+    const transactions: Transaction[] = [];
+
+    // Split into lines and remove empty lines
+    const lines = tableText.split('\n').filter((line) => line.trim().length > 0);
+
+    // Skip header line(s)
+    let startIndex = 0;
+    for (let i = 0; i < lines.length; i++) {
+      if (this.isHeaderLine(lines[i])) {
+        startIndex = i + 1;
+        break;
+      }
+    }
+
+    // Parse transaction lines
+    let i = startIndex;
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Skip footer lines
+      if (this.isFooterLine(line)) {
+        break;
+      }
+
+      // Skip exchange rate lines (they follow foreign currency transactions)
+      if (isExchangeRateLine(line)) {
+        i++;
+        continue;
+      }
+
+      // Try to parse this as a transaction line
+      const transaction = this.parseTransactionLine(line, lines[i + 1]);
+
+      if (transaction) {
+        transactions.push(transaction);
+
+        // If this was a foreign currency transaction with exchange rate, skip the next line
+        if (transaction.originalCurrency && lines[i + 1] && isExchangeRateLine(lines[i + 1])) {
+          i += 2;
+          continue;
+        }
+      }
+
+      i++;
+    }
+
+    return transactions;
+  }
+
+  /**
+   * Check if a line is a table header line
+   *
+   * @param line - Line to check
+   * @returns true if this is a header line
+   */
+  private isHeaderLine(line: string): boolean {
+    const headerMarkers = ['Date de transaction', 'Description', 'Montant en euros', 'Date valeur'];
+
+    return headerMarkers.some((marker) => line.includes(marker));
+  }
+
+  /**
+   * Check if a line is a footer/summary line (not a transaction)
+   *
+   * @param line - Line to check
+   * @returns true if this is a footer line
+   */
+  private isFooterLine(line: string): boolean {
+    const footerMarkers = [
+      'SOLDE ACTUEL',
+      'TOTAL DES DEPENSES',
+      'Total des dépenses',
+      'Votre résultat',
+      'Résultat du compte',
+      'Sous-total',
+      '-----',
+      '====',
+    ];
+
+    return footerMarkers.some((marker) => line.includes(marker));
+  }
+
+  /**
+   * Parse a single transaction line
+   *
+   * BNP format: "12 mars 2024    AMAZON EU SARL    -19,00"
+   * Or with currency: "15 mars 2024    FOREIGN STORE    -45,00 USD"
+   *
+   * The description may contain spaces, so we parse from both ends:
+   * - Start: Date (French format)
+   * - End: Amount (European format, optional currency)
+   * - Middle: Description
+   *
+   * @param line - Transaction line to parse
+   * @param nextLine - Next line (to check for exchange rate)
+   * @returns Transaction object or null if not a valid transaction
+   */
+  private parseTransactionLine(line: string, nextLine?: string): Transaction | null {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    // Try to extract date from the beginning
+    const datePattern = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
+    const dateMatch = trimmed.match(datePattern);
+
+    if (!dateMatch) {
+      return null;
+    }
+
+    const dateStr = dateMatch[1];
+    const afterDate = trimmed.slice(dateMatch[0].length).trim();
+
+    // Parse the date
+    const date = parseFrenchDate(dateStr);
+    if (!date) {
+      return null;
+    }
+
+    // Try to find amount at the end
+    // Amount pattern: optional sign, digits with optional thousand separators, comma decimal, optional currency
+    const amountPattern = /(-?\d[\d\s]*,\d{2}(?:\s*[A-Z]{3})?)\s*$/;
+    const amountMatch = afterDate.match(amountPattern);
+
+    if (!amountMatch) {
+      return null;
+    }
+
+    const amountStr = amountMatch[1].trim();
+    const beforeAmount = afterDate.slice(0, afterDate.length - amountMatch[0].length).trim();
+
+    // Parse the amount
+    const parsedAmount = parseAmountWithCurrency(amountStr);
+    if (!parsedAmount) {
+      return null;
+    }
+
+    // Description is what's left in the middle
+    const description = beforeAmount;
+
+    // Skip lines that don't have a meaningful description
+    if (!description || description.length < 2) {
+      return null;
+    }
+
+    return {
+      date,
+      description,
+      amount: parsedAmount.amount,
+      originalCurrency: parsedAmount.currency,
+    };
   }
 
   /**

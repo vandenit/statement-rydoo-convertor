@@ -26,14 +26,14 @@ export interface RawTransaction {
 
 /**
  * Result of parsing a PDF statement
- * Contains extracted card number and raw transaction data
+ * Contains extracted card number and parsed transaction data
  */
 export interface ParserResult {
   /** Last 4 digits of card number (e.g., "8204") */
   cardNumber: string;
-  /** Array of raw transactions extracted from PDF */
-  rawTransactions: RawTransaction[];
-  /** Full PDF text for debugging and Phase 3 processing */
+  /** Array of parsed transactions extracted from PDF */
+  rawTransactions: Transaction[];
+  /** Full PDF text for debugging */
   rawText: string;
 }
 

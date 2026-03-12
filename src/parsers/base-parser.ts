@@ -11,6 +11,7 @@
 import { PdfContent } from '../types/pdf.js';
 import {
   ParserResult,
+  Transaction,
   RawTransaction,
   TransactionTableBounds,
   CardNumberInfo,
@@ -73,16 +74,15 @@ export abstract class BaseParser {
   protected abstract identifyTableBounds(text: string): TransactionTableBounds | null;
 
   /**
-   * Extract raw transactions from the transaction table section
+   * Extract transactions from the transaction table section
    *
    * @param tableText - Text content of the transaction table section
-   * @returns Array of RawTransaction objects
+   * @returns Array of Transaction objects with parsed data
    *
    * Override in subclass for bank-specific row parsing.
-   * Phase 2: Returns empty array (table identification only)
-   * Phase 3: Returns parsed transactions
+   * Phase 3: Returns fully parsed Transaction objects
    */
-  protected abstract extractTransactions(tableText: string): RawTransaction[];
+  protected abstract extractTransactions(tableText: string): Transaction[];
 
   /**
    * Utility: Find first occurrence of any pattern in text
