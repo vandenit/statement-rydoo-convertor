@@ -11,53 +11,50 @@ Users can convert credit card statements to Rydoo format without manual data ent
 ## Current Position
 
 **Current Phase:** 2 — PDF Parsing Infrastructure  
-**Current Plan:** 02-01  
-**Status:** In Progress (1/2 plans complete in current phase)
+**Current Plan:** 02-02  
+**Status:** Phase Complete (2/2 plans complete)
 
 ### Phase Progress
 
 ```
-[██████░░░░░░░░░░░░░░] 30% Overall (1.5/5 phases completed)
+[████████░░░░░░░░░░░░] 40% Overall (2/5 phases completed)
 ```
 
 **Phase Status:**
 | Phase | Progress | State |
 |-------|----------|-------|
 | 1 - Project Setup | 100% | 🟢 Completed |
-| 2 - PDF Parsing Infrastructure | 50% | 🟡 In Progress |
+| 2 - PDF Parsing Infrastructure | 100% | 🟢 Completed |
 | 3 - Data Extraction | 0% | 🔵 Not Started |
 | 4 - Excel Generation | 0% | 🔵 Not Started |
 | 5 - CLI Interface and Integration | 0% | 🔵 Not Started |
 
 ## Current Focus
 
-**Immediate Next Step:** Execute 02-02-PLAN.md — BNP Parser Implementation
+**Immediate Next Step:** Execute 03-01-PLAN.md — Data Extraction Implementation
 
-**Phase 2 Goal:** System can extract raw text and structure from BNP PDFs
+**Phase 2 Complete:** ✓ PDF Parsing Infrastructure
 
-**Phase 2 Plan 1 Completed:** ✓ PDF Parsing Infrastructure
+- Plan 02-01: PDF parser infrastructure with pdf-parse
+- Plan 02-02: BNP parser with card extraction and table identification
 
-- pdf-parse library installed and configured
-- Type definitions created (PdfContent, PdfPage)
-- parsePdf function implemented with per-page support
-- Parser module exports ready
-
-**Success Criteria for Current Phase:**
+**Phase 2 Accomplishments:**
 
 1. ✓ System can parse single-page BNP PDF and extract raw text content
-2. ⏳ System can identify transaction table boundaries in parsed text (next plan)
-3. ✓ System handles multi-page PDFs without losing transaction data (infrastructure ready)
-4. ⏳ System extracts complete card number from PDF header ("Numéro de carte XXXX") (next plan)
+2. ✓ System can identify transaction table boundaries in parsed text
+3. ✓ System handles multi-page PDFs without losing transaction data
+4. ✓ System extracts complete card number from PDF header ("Numéro de carte XXXX")
 5. ✓ Parser returns structured intermediate format with raw text sections
+6. ✓ Strategy pattern architecture implemented (ARCH-03)
 
 ## Performance Metrics
 
 | Metric                 | Value | Target |
 | ---------------------- | ----- | ------ |
-| Phases Completed       | 1.5/5 | 5      |
-| Requirements Delivered | 2/21  | 21     |
-| Success Criteria Met   | 5/23  | 23     |
-| Plans Completed        | 3/7   | 7      |
+| Phases Completed       | 2/5   | 5      |
+| Requirements Delivered | 5/21  | 21     |
+| Success Criteria Met   | 8/23  | 23     |
+| Plans Completed        | 4/7   | 7      |
 | Days Since Start       | 0     | -      |
 
 ## Accumulated Context
@@ -67,6 +64,9 @@ Users can convert credit card statements to Rydoo format without manual data ent
 1. **Use pdf-parse v2.x class-based API**: Installed pdf-parse v2.4.5 which uses `new PDFParse({ data: buffer })` pattern with explicit `getText()` and `destroy()` methods.
 2. **Use require() with createRequire for CommonJS modules**: pdf-parse uses CommonJS exports, so we use `createRequire(import.meta.url)` to import it in ESM context.
 3. **Structured types for multi-page support**: Created PdfPage interface with pageNumber and text fields to support per-page content extraction (PARSE-03).
+4. **Abstract class for parser base**: Used `abstract class BaseParser` instead of interface to provide shared utility methods (findFirstMatch, extractBetweenMarkers) to all bank parsers.
+5. **Multiple regex patterns for robust extraction**: Implemented primary + alternative + fallback regex patterns for card number extraction to handle BNP PDF format variations.
+6. **Phase separation for transaction parsing**: Phase 2 identifies table boundaries and returns raw section text. Phase 3 will implement row-by-row transaction parsing. This separates section identification from content parsing.
 
 ### Open Questions
 
@@ -122,26 +122,29 @@ statement-convertor/
 
 ### Last Session
 
-2026-03-12 - Completed 02-01-PLAN.md (PDF Parsing Infrastructure)
+2026-03-12 - Completed 02-02-PLAN.md (BNP Parser Implementation)
 
-- Installed pdf-parse v2.4.5
-- Created PDF type definitions
-- Implemented parsePdf function
-- Created parser module index
+- Created transaction type definitions (RawTransaction, ParserResult, BankParser)
+- Implemented BaseParser abstract class with Strategy pattern (ARCH-03)
+- Built BnpParser with card number extraction and table boundary detection
+- Updated parser index with clean exports
+- Phase 2 PDF Parsing Infrastructure complete
 
 ### Current Work
 
-Phase 2: PDF Parsing Infrastructure - Plan 1 of 2 complete
+Phase 2: PDF Parsing Infrastructure - ✓ Complete
 
 - PDF text extraction foundation ready
-- Ready to implement BNP-specific parser
+- BNP parser with card extraction and table identification ready
+- Ready for Phase 3: Data Extraction
 
 ### Next Actions
 
-1. Execute 02-02-PLAN.md — BNP Parser Implementation
-2. Implement card number extraction from "Numéro de carte" header
-3. Identify transaction table boundaries in parsed text
-4. Build BNP parser using strategy pattern
+1. Execute 03-01-PLAN.md — Transaction Data Extraction
+2. Parse individual transaction rows from table section
+3. Convert French dates to M/D/YYYY format (EXTRACT-05)
+4. Parse amounts with comma decimal separator (EXTRACT-03)
+5. Detect and extract foreign currency codes (EXTRACT-04)
 
 ### Files in Progress
 
@@ -170,9 +173,9 @@ _No files currently being worked on._
 
 ### Phase 3 Entry (Prerequisites)
 
-- [ ] PDF text extraction works
-- [ ] Transaction table identification works
-- [ ] Card number extraction works
+- [x] PDF text extraction works
+- [x] Transaction table identification works
+- [x] Card number extraction works
 
 ### Phase 4 Entry (Prerequisites)
 
