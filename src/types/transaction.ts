@@ -88,3 +88,26 @@ export interface CardNumberInfo {
   /** Card type if detected (e.g., "VISA", "MASTERCARD") */
   cardType?: string;
 }
+
+/**
+ * Parsed transaction with typed fields
+ *
+ * Clean data structure with proper types for downstream processing.
+ * Converted from RawTransaction in Phase 3 (Data Extraction).
+ *
+ * Requirements covered:
+ * - EXTRACT-01: Extract transaction date as Date object
+ * - EXTRACT-03: Extract amount as number
+ * - EXTRACT-04: Extract original currency code
+ * - EXTRACT-05: Format dates as M/D/YYYY for output
+ */
+export interface Transaction {
+  /** Parsed date as Date object */
+  date: Date;
+  /** Merchant name/description */
+  description: string;
+  /** Amount as number (negative for debits, positive for credits) */
+  amount: number;
+  /** Original currency code for foreign transactions (e.g., "USD") */
+  originalCurrency?: string;
+}
