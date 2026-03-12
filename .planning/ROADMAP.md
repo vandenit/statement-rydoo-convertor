@@ -76,6 +76,13 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 **Dependencies:** Phase 2 (PDF Parsing Infrastructure)
 
+**Plans:** 2 plans in 1 wave (parallel)
+
+**Plan List:**
+
+- [ ] 03-01-PLAN.md — Create Transaction type and French date parser utility
+- [ ] 03-02-PLAN.md — Implement amount parser and transaction row extraction
+
 **Requirements:**
 
 - EXTRACT-01: Extract transaction date (Date de transaction)
