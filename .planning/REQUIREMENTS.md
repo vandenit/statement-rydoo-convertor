@@ -88,8 +88,8 @@
 | CLI-03 | Phase 5 | Pending |
 | CLI-04 | Phase 5 | Pending |
 | CLI-05 | Phase 5 | Pending |
-| ARCH-01 | Phase 1 | Pending |
-| ARCH-02 | Phase 1 | Pending |
+| ARCH-01 | Phase 1 | Complete |
+| ARCH-02 | Phase 1 | Complete |
 | ARCH-03 | Phase 5 | Pending |
 
 **Coverage:**

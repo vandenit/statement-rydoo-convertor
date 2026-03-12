@@ -15,6 +15,12 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 **Dependencies:** None
 
+**Plans:** 2 plans
+
+**Plan List:**
+- [x] 01-01-PLAN.md — Initialize npm project, configure TypeScript, create folder structure
+- [x] 01-02-PLAN.md — Install dependencies, create CLI entry point, configure build scripts and tooling
+
 **Requirements:**
 - ARCH-01: TypeScript implementation
 - ARCH-02: Installable via npm
@@ -130,7 +136,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 | Phase | Status | Started | Completed |
 |-------|--------|---------|-----------|
-| 1 - Project Setup | 🔵 Not Started | - | - |
+| 1 - Project Setup | 🟢 Completed | 2025-03-12 | 2025-03-12 |
 | 2 - PDF Parsing Infrastructure | 🔵 Not Started | - | - |
 | 3 - Data Extraction | 🔵 Not Started | - | - |
 | 4 - Excel Generation | 🔵 Not Started | - | - |
