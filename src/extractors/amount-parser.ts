@@ -85,12 +85,17 @@ export function parseAmountWithCurrency(amountStr: string): ParsedAmount | null 
 
   // Check for currency code at the end (3-letter uppercase code)
   // Matches: "-45,00 USD" or "-45,00USD" or "123,45 USD" at end of string
-  const currencyPattern = /^(.*?)\s*([A-Z]{3})\s*$/;
+  const currencyPattern = /^(.*?)\s*([A-Z]{3}|[€$£¥])\s*$/;
   const match = trimmed.match(currencyPattern);
 
   if (match) {
     const amountPart = match[1].trim();
-    const currency = match[2];
+    let currency = match[2];
+    
+    // Normalize symbols to codes
+    if (currency === '€') currency = 'EUR';
+    if (currency === '$') currency = 'USD';
+    if (currency === '£') currency = 'GBP';
 
     // Parse the amount part (without currency)
     const amount = parseAmount(amountPart);

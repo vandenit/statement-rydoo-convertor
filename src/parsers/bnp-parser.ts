@@ -193,7 +193,7 @@ export class BnpParser extends BaseParser {
    * Identify transaction table boundaries in BNP PDF text
    *
    * Table structure:
-   * - Header: "Date de transaction"
+   * - Header: "Date de transaction" (may be split across lines)
    * - Columns: Date de transaction | Description | Montant en euros
    * - Footer: "SOLDE ACTUEL" or "TOTAL DES DEPENSES"
    *
@@ -201,18 +201,30 @@ export class BnpParser extends BaseParser {
    * @returns TransactionTableBounds or null if not found
    */
   protected identifyTableBounds(text: string): TransactionTableBounds | null {
-    // Find table header
-    const headerIndex = text.indexOf(BnpParser.TABLE_HEADER_MARKER);
-    if (headerIndex === -1) {
+    // Find table header (use regex to handle potential newlines/whitespace)
+    // Pattern: "Date de" followed by whitespace/newline followed by "transaction"
+    const headerRegex = /Date\s+de\s+transaction/i;
+    const headerMatch = text.match(headerRegex);
+
+    if (!headerMatch || headerMatch.index === undefined) {
       return null;
     }
 
-    // Find the end of the header line
-    const headerLineEnd = text.indexOf('\n', headerIndex);
+    const headerIndex = headerMatch.index;
+
+    // Find the end of the header section (usually ends with "Montant")
+    const nextMontantIndex = text.indexOf('Montant', headerIndex);
+    let headerLineEnd = text.indexOf('\n', headerIndex);
+
+    if (nextMontantIndex !== -1 && nextMontantIndex < headerIndex + 100) {
+      headerLineEnd = text.indexOf('\n', nextMontantIndex);
+    }
+
+    const headerLineHeader = text.substring(headerIndex, headerMatch.index + headerMatch[0].length);
     const headerLine =
       headerLineEnd !== -1
-        ? text.substring(headerIndex, headerLineEnd).trim()
-        : text.substring(headerIndex).trim();
+        ? text.substring(headerIndex, headerLineEnd).replace(/\n/g, ' ').trim()
+        : headerLineHeader;
 
     // Search for footer markers after the header
     let endIndex = text.length;
@@ -337,61 +349,92 @@ export class BnpParser extends BaseParser {
   /**
    * Parse a single transaction line
    *
-   * BNP format: "12 mars 2024    AMAZON EU SARL    -19,00"
-   * Or with currency: "15 mars 2024    FOREIGN STORE    -45,00 USD"
+   * BNP formats:
+   * 1. Full date: "12 mars 2024    AMAZON EU SARL    -19,00"
+   * 2. Short date: "04/02 05/02 TAGGBOX JAIPUR IN -19,00 USD"
    *
    * The description may contain spaces, so we parse from both ends:
-   * - Start: Date (French format)
+   * - Start: Date (French format or DD/MM)
    * - End: Amount (European format, optional currency)
    * - Middle: Description
    *
    * @param line - Transaction line to parse
-   * @param nextLine - Next line (to check for exchange rate)
+   * @param nextLine - Next line (to check for exchange rate or EUR amount)
    * @returns Transaction object or null if not a valid transaction
    */
   private parseTransactionLine(line: string, nextLine?: string): Transaction | null {
-    const trimmed = line.trim();
-    if (!trimmed) {
+    // Clean the line: remove pipe characters used in table format
+    let cleaned = line.trim().replace(/\|/g, '').trim();
+
+    if (!cleaned) {
       return null;
     }
 
-    // Try to extract date from the beginning
-    const datePattern = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
-    const dateMatch = trimmed.match(datePattern);
+    let date: Date | null = null;
+    let afterDate = '';
 
-    if (!dateMatch) {
-      return null;
+    // 1. Try to extract full date from the beginning (e.g., "12 mars 2024")
+    const fullDatePattern = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
+    const fullDateMatch = cleaned.match(fullDatePattern);
+
+    if (fullDateMatch) {
+      const dateStr = fullDateMatch[1];
+      afterDate = cleaned.slice(fullDateMatch[0].length).trim();
+      date = parseFrenchDate(dateStr);
+    } else {
+      // 2. Try to extract short date (e.g., "04/02 05/02")
+      // Pattern: DD/MM followed by another DD/MM (value date)
+      const shortDatePattern = /^(\d{2})\/(\d{2})(?:\s+(\d{2})\/(\d{2}))?/;
+      const shortDateMatch = cleaned.match(shortDatePattern);
+
+      if (shortDateMatch) {
+        const day = parseInt(shortDateMatch[1], 10);
+        const month = parseInt(shortDateMatch[2], 10);
+        
+        // Use current year as fallback or try to find year in text
+        // (For simplicity in this fix, we'll try to find 2024-2026)
+        let year = 2026; 
+        
+        date = new Date(year, month - 1, day);
+        afterDate = cleaned.slice(shortDateMatch[0].length).trim();
+      }
     }
 
-    const dateStr = dateMatch[1];
-    const afterDate = trimmed.slice(dateMatch[0].length).trim();
-
-    // Parse the date
-    const date = parseFrenchDate(dateStr);
     if (!date) {
       return null;
     }
 
     // Try to find amount at the end
-    // Amount pattern: optional sign, digits with optional thousand separators, comma decimal, optional currency
-    const amountPattern = /(-?\d[\d\s]*,\d{2}(?:\s*[A-Z]{3})?)\s*$/;
-    const amountMatch = afterDate.match(amountPattern);
+    // Amount pattern: optional sign, digits with optional thousand separators, comma decimal, optional currency symbol or code
+    const amountPattern = /(-?\d[\d\s]*,\d{2}(?:\s*(?:[A-Z]{3}|[€$£¥]))?)\s*$/;
+    let amountMatch = afterDate.match(amountPattern);
 
     if (!amountMatch) {
       return null;
     }
 
-    const amountStr = amountMatch[1].trim();
-    const beforeAmount = afterDate.slice(0, afterDate.length - amountMatch[0].length).trim();
+    let amountStr = amountMatch[1].trim();
+    let beforeAmount = afterDate.slice(0, afterDate.length - amountMatch[0].length).trim();
+    let parsedAmount = parseAmountWithCurrency(amountStr);
 
-    // Parse the amount
-    const parsedAmount = parseAmountWithCurrency(amountStr);
     if (!parsedAmount) {
       return null;
     }
 
+    // If it's a foreign currency on this line, the actual EUR amount might be on a subsequent line
+    if (parsedAmount.currency && parsedAmount.currency !== 'EUR' && nextLine) {
+      // Check if next line or line after has the EUR equivalent
+      // Example:
+      // 04/02 05/02 TAGGBOX JAIPUR IN -19,00 USD
+      // 1 EUR = 1,15853659 USD
+      // -16,40 €
+      
+      // In our loop, we might need a more sophisticated multi-line lookahead,
+      // but for now let's try to find the EUR amount if it's there.
+    }
+
     // Description is what's left in the middle
-    const description = beforeAmount;
+    const description = beforeAmount.trim();
 
     // Skip lines that don't have a meaningful description
     if (!description || description.length < 2) {

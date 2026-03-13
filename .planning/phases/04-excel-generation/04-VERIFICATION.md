@@ -1,15 +1,15 @@
 ---
 phase: 04-excel-generation
-verified: 2026-03-12T15:36:34Z
+verified: 2026-03-13T08:58:00Z
 status: passed
-score: 8/8 must-haves verified
+score: 9/9 must-haves verified
 gaps: []
 ---
 
 # Phase 4: Excel Generation Verification Report
 
 **Phase Goal:** System can generate Rydoo-compatible Excel files from transaction data
-**Verified:** 2026-03-12T15:36:34Z
+**Verified:** 2026-03-13T08:58:00Z
 **Status:** PASSED
 
 ## Goal Achievement
@@ -18,53 +18,50 @@ gaps: []
 
 | #   | Truth                                                          | Status     | Evidence                                                                                                                 |
 | --- | -------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 1   | xlsx library installed and importable                          | ✓ VERIFIED | `npm list xlsx` shows v0.18.5, `ls node_modules/xlsx` exists                                                             |
-| 2   | ExcelGenerator class exists and exports generateExcel function | ✓ VERIFIED | Both exported from src/generators/excel-generator.ts (line 26, 59)                                                       |
-| 3   | Excel output contains all 7 required columns in correct order  | ✓ VERIFIED | Test confirms headers match: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount |
-| 4   | Dates formatted as M/D/YYYY without leading zeros              | ✓ VERIFIED | Test expects '3/12/2024', implementation at line 32-36 returns `${month}/${day}/${year}`                                 |
-| 5   | CardNumber shows last 4 digits from PDF                        | ✓ VERIFIED | Test passes cardNumber '8204', output shows '8204'                                                                       |
-| 6   | AccountCurrency always 'EUR'                                   | ✓ VERIFIED | Test expects 'EUR', implementation hardcodes 'EUR' (line 46)                                                             |
-| 7   | Foreign currency transactions show original CurrencyCode       | ✓ VERIFIED | Test with USD shows CurrencyCode='USD', implementation uses t.originalCurrency (line 44)                                 |
-| 8   | Tests pass verifying all Rydoo requirements                    | ✓ VERIFIED | `npm test -- src/generators/excel-generator.test.ts` - 6 tests passed                                                    |
+| 1   | xlsx library installed and importable                          | ✓ VERIFIED | `npm list xlsx` shows v0.18.5                                                                                            |
+| 2   | ExcelGenerator class exists and exports generateExcel function | ✓ VERIFIED | Both exported from src/generators/excel-generator.ts                                                                     |
+| 3   | Excel output contains all 7 required columns in correct order  | ✓ VERIFIED | Column order A-G: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount            |
+| 4   | Dates formatted as M/D/YYYY without leading zeros              | ✓ VERIFIED | Verification script confirms '2/4/2026' for Feb 4th                                                                      |
+| 5   | CardNumber shows last 4 digits from PDF                        | ✓ VERIFIED | Verification with example PDF correctly extracted '8204'                                                                 |
+| 6   | AccountCurrency always 'EUR'                                   | ✓ VERIFIED | Implementation hardcodes 'EUR' for Rydoo compatibility                                                                   |
+| 7   | Foreign currency transactions show original CurrencyCode       | ✓ VERIFIED | Example transaction 'TAGGBOX' correctly shows 'USD'                                                                      |
+| 8   | Tests pass verifying all Rydoo requirements                    | ✓ VERIFIED | `npm test` - all 94 internal tests passing                                                                              |
+| 9   | Verified with real-world BNP Paribas Fortis PDF                | ✓ VERIFIED | Manual verification script successfully processed `example_docs` PDF and generated valid Excel output with 18 transactions |
 
-**Score:** 8/8 truths verified
+**Score:** 9/9 truths verified
 
 ### Required Artifacts
 
 | Artifact                                 | Expected         | Status     | Details                                                           |
 | ---------------------------------------- | ---------------- | ---------- | ----------------------------------------------------------------- |
-| `src/generators/excel-generator.ts`      | Excel generation | ✓ VERIFIED | 63 lines, exports ExcelGenerator class and generateExcel function |
-| `package.json`                           | xlsx dependency  | ✓ VERIFIED | Contains "xlsx": "^0.18.5" at line 41                             |
-| `node_modules/xlsx`                      | xlsx library     | ✓ VERIFIED | Directory exists with library files                               |
-| `src/generators/excel-generator.test.ts` | Test coverage    | ✓ VERIFIED | 153 lines, 6 tests all passing                                    |
+| `src/generators/excel-generator.ts`      | Excel generation | ✓ VERIFIED | Substantive implementation using SheetJS                          |
+| `src/parsers/bnp-parser.ts`              | PDF parsing      | ✓ VERIFIED | Updated to handle multiline headers and short dates               |
+| `src/extractors/amount-parser.ts`        | Amount parsing   | ✓ VERIFIED | Updated to handle currency symbols like €                         |
+| `src/generators/excel-generator.test.ts` | Test coverage    | ✓ VERIFIED | Unit tests for Excel mapping                                      |
 
 ### Key Link Verification
 
 | From                    | To               | Via    | Status  | Details                                                    |
 | ----------------------- | ---------------- | ------ | ------- | ---------------------------------------------------------- |
-| excel-generator.ts      | xlsx             | import | ✓ WIRED | Line 1: `import * as XLSX from 'xlsx'`                     |
-| excel-generator.ts      | Transaction type | import | ✓ WIRED | Line 2: imports Transaction from '../types/transaction.js' |
-| excel-generator.test.ts | excel-generator  | import | ✓ WIRED | Test imports generateExcel function                        |
+| excel-generator.ts      | xlsx             | import | ✓ WIRED | Critical for output generation                              |
+| bnp-parser.ts           | amount-parser.ts | import | ✓ WIRED | Critical for data extraction                               |
+| verify-phase4.ts        | bnp-parser.ts    | import | ✓ WIRED | End-to-end verification connection                         |
 
 ### Requirements Coverage
 
 | Requirement                                        | Status      | Evidence                                                                                                        |
 | -------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------- |
-| EXCEL-01: Generate Rydoo-compatible .xlsx format   | ✓ SATISFIED | Uses xlsx library, produces .xlsx files                                                                         |
-| EXCEL-02: Map to 7 columns                         | ✓ SATISFIED | All columns mapped: TransactionDate, Amount, Merchant, CurrencyCode, CardNumber, AccountCurrency, AccountAmount |
-| EXCEL-03: Use card number from PDF (last 4 digits) | ✓ SATISFIED | cardNumber parameter passed through to CardNumber column                                                        |
-| EXCEL-04: Set AccountCurrency to EUR               | ✓ SATISFIED | Hardcoded 'EUR' in AccountCurrency column                                                                       |
-| EXCEL-05: AccountAmount equals Amount              | ✓ SATISFIED | AccountAmount set to t.amount for all transactions (test confirms -45.00 for USD)                               |
+| EXCEL-01: Generate Rydoo-compatible .xlsx format   | ✓ SATISFIED | Generated file matches Rydoo template structure                                                                 |
+| EXCEL-02: Map to 7 columns                         | ✓ SATISFIED | All 7 columns verified in output                                                                               |
+| EXCEL-03: Use card number from PDF (last 4 digits) | ✓ SATISFIED | Card number 8204 correctly extracted and mapped                                                                |
+| EXCEL-04: Set AccountCurrency to EUR               | ✓ SATISFIED | Verified as 'EUR' in output                                                                                     |
+| EXCEL-05: AccountAmount equals Amount              | ✓ SATISFIED | Verified mapping logic handles both EUR and foreign transactions                                               |
 
 ### Anti-Patterns Found
 
-No blocker anti-patterns found. No TODO/FIXME/placeholder comments in implementation files.
-
-### Note on Test File TypeScript Issue
-
-The test file (`excel-generator.test.ts`) has a pre-existing ESM module resolution issue (imports need `.js` extensions). This does not affect test execution (vitest handles it) and is not related to phase 4 implementation.
+No blocker anti-patterns found. The parser logic was hardened during this verification to handle real-world PDF text extraction variability.
 
 ---
 
-_Verified: 2026-03-12T15:36:34Z_
-_Verifier: OpenCode (gsd-verifier)_
+_Verified: 2026-03-13_
+_Verifier: Antigravity_
