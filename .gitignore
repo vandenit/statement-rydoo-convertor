@@ -14,9 +14,13 @@ dist-linux/
 .env
 
 # Output files
-output/*.xlsx
-processed/*.pdf
-input/*.pdf
+output/
+processed/
+input/
+
+# Debug files
+debug_pdf_text*
+debug_pdf.js
 
 # IDE
 .vscode/
