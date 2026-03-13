@@ -28,9 +28,6 @@
       "node18-win-x64",
       "node18-macos-x64",
       "node18-macos-arm64"
-    ],
-    "assets": [
-      "node_modules/pdf-parse/lib/pdf.js/**/*"
     ]
   },
   "keywords": [

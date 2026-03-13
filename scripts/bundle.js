@@ -18,7 +18,7 @@ async function bundle() {
     minify: false,
     sourcemap: true,
     mainFields: ['module', 'main'],
-    external: ['pdf-parse', 'xlsx', 'commander'],
+    external: ['xlsx', 'commander'],
     // We bundle everything except large/problematic libraries
   });
   

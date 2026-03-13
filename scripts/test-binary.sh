@@ -19,16 +19,24 @@ echo "🔍 Starting E2E smoke test for: $BINARY_PATH"
 TEST_DIR=$(mktemp -d)
 echo "📂 Using temp directory: $TEST_DIR"
 
+# Move the binary to the test directory to ensure it's self-contained
+# and doesn't 'leak' and find node_modules in parent folders
+cp "$BINARY_PATH" "$TEST_DIR/bin-to-test"
+chmod +x "$TEST_DIR/bin-to-test"
+BINARY_TO_RUN="./bin-to-test"
+
 mkdir -p "$TEST_DIR/input"
 mkdir -p "$TEST_DIR/output"
 mkdir -p "$TEST_DIR/processed"
 
 # Copy a sample PDF from the repository
-SAMPLE_PDF="example_docs/VAN DEN BROECK CHARLOTTE-5480 28XX XXXX 8204-20260205.pdf"
+# We need to use the absolute path of the current directory to find it
+SOURCE_DIR=$(pwd)
+SAMPLE_PDF="$SOURCE_DIR/example_docs/VAN DEN BROECK CHARLOTTE-5480 28XX XXXX 8204-20260205.pdf"
 
 if [ ! -f "$SAMPLE_PDF" ]; then
   echo "⚠️ Preferred sample not found, looking for any PDF in example_docs/..."
-  SAMPLE_PDF=$(find example_docs -name "*.pdf" | head -n 1)
+  SAMPLE_PDF=$(find "$SOURCE_DIR/example_docs" -name "*.pdf" | head -n 1)
 fi
 
 if [ -z "$SAMPLE_PDF" ] || [ ! -f "$SAMPLE_PDF" ]; then
@@ -40,12 +48,10 @@ cp "$SAMPLE_PDF" "$TEST_DIR/input/test.pdf"
 echo "📄 Copied sample: $SAMPLE_PDF"
 
 # Run the binary
-# We use absolute paths to avoid any ambiguity
-ABS_BINARY=$(realpath "$BINARY_PATH")
 cd "$TEST_DIR"
 
 echo "⚙️ Running binary..."
-"$ABS_BINARY" --input ./input --output ./output --processed ./processed
+"$BINARY_TO_RUN" --input ./input --output ./output --processed ./processed
 
 # Verify output
 EXCEL_FILE=$(find ./output -name "*.xlsx")

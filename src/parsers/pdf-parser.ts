@@ -1,5 +1,5 @@
-// @ts-ignore - pdf-parse v1 has limited ESM type support but the functional API is stable
-import pdf from 'pdf-parse';
+// @ts-ignore - Local patched version of pdf-parse
+import pdf from '../libs/pdf-parse/index.cjs';
 import { PdfContent, PdfPage } from '../types/pdf.js';
 
 /**
