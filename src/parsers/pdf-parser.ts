@@ -1,66 +1,45 @@
-import { PDFParse } from 'pdf-parse';
+// @ts-ignore - pdf-parse v1 has limited ESM type support but the functional API is stable
+import pdf from 'pdf-parse';
 import { PdfContent, PdfPage } from '../types/pdf.js';
 
 /**
  * PDF Parser Module
  *
- * Provides text extraction from PDF buffers with page-level support.
- * Uses pdf-parse library v2.x with class-based API.
+ * Provides text extraction from PDF buffers.
+ * Uses stable pdf-parse v1.1.1 which is compatible with pkg and Node 18.
  */
 
 /**
  * Parse a PDF buffer and extract text content
  *
  * @param buffer - PDF file buffer
- * @returns Promise<PdfContent> - Structured PDF content with page information
+ * @returns Promise<PdfContent> - Structured PDF content
  * @throws Error if PDF parsing fails
  */
 export async function parsePdf(buffer: Buffer): Promise<PdfContent> {
-  let parser: PDFParse | undefined;
-
   try {
-    // Create parser instance with the PDF buffer
-    parser = new PDFParse({ data: buffer });
+    // pdf-parse v1 API is a simple function
+    const data = await (pdf as any)(buffer);
 
-    // Extract text from all pages
-    const textResult = await parser.getText({
-      // Get all pages (partial: undefined means all pages)
-    });
-
-    // Build page array from text result
-    const pages: PdfPage[] = [];
-
-    if (textResult.pages && textResult.pages.length > 0) {
-      // Use per-page text if available
-      for (const pageResult of textResult.pages) {
-        pages.push({
-          pageNumber: pageResult.num,
-          text: pageResult.text,
-        });
-      }
-    } else {
-      // Fallback: single page with full text
-      pages.push({
+    const pages: PdfPage[] = [
+      {
         pageNumber: 1,
-        text: textResult.text,
-      });
-    }
-
-    // Get document info
-    const infoResult = await parser.getInfo();
+        text: data.text,
+      },
+    ];
 
     const content: PdfContent = {
-      text: textResult.text,
+      text: data.text,
       pages,
-      numPages: pages.length,
+      numPages: data.numpages,
       info: {
-        Title: infoResult.info?.Title,
-        Author: infoResult.info?.Author,
-        Subject: infoResult.info?.Subject,
-        Creator: infoResult.info?.Creator,
-        Producer: infoResult.info?.Producer,
-        CreationDate: infoResult.info?.CreationDate,
-        ModDate: infoResult.info?.ModDate,
+        Title: data.info?.Title,
+        Author: data.info?.Author,
+        Subject: data.info?.Subject,
+        Creator: data.info?.Creator,
+        Producer: data.info?.Producer,
+        CreationDate: data.info?.CreationDate,
+        ModDate: data.info?.ModDate,
       },
     };
 
@@ -68,11 +47,6 @@ export async function parsePdf(buffer: Buffer): Promise<PdfContent> {
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     throw new Error(`Failed to parse PDF: ${message}`);
-  } finally {
-    // Clean up parser resources
-    if (parser) {
-      await parser.destroy();
-    }
   }
 }
 

@@ -14,6 +14,11 @@ fi
 
 echo "🚀 Starting release process ($VERSION_TYPE)..."
 
+# Run validation checks before anything else
+echo "🔍 Running pre-release checks (types & tests)..."
+npm run check
+echo "✅ Checks passed!"
+
 # Use npm version to update package.json and package-lock.json
 # --no-git-tag-version lets us handle the commit and tag ourselves for better control
 NEW_VERSION=$(npm version $VERSION_TYPE --no-git-tag-version)
