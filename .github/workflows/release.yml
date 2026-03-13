@@ -29,7 +29,7 @@ jobs:
         run: npm run bundle
 
       - name: Create Windows binary
-        run: npx pkg dist/bundle.cjs --targets node18-win-x64 --out-path ./dist-exe --output statement-convertor.exe
+        run: npx pkg dist/bundle.cjs --targets node18-win-x64 --output ./dist-exe/statement-convertor.exe
 
       - name: Create macOS binaries
         run: npx pkg dist/bundle.cjs --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos
