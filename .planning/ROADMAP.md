@@ -197,6 +197,14 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 | 8 - Final Polish & Multi-file     | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 | 9 - macOS Distribution            | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 | 10 - CI/CD & GitHub Releases       | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 11 - Fix ESM & Library Crashes      | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 12 - CI/CD Refinement              | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 13 - Fix "Invalid host options"    | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 14 - Fix "Missing pdf.js"          | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 15 - Enhanced Binary Smoke Tests   | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 16 - Local PDF Parser Bundling     | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 17 - Multi-page & Multi-line Supp. | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 18 - Transaction Total Validation  | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 
 **Legend:**
 
