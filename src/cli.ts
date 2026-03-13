@@ -47,12 +47,17 @@ program
       const allTransactions = [];
       const cardNumbers = new Set<string>();
 
+      let grandTotal = 0;
+
       for (const file of files) {
         const filePath = path.join(inputPath, file);
         const result = await converter.convert(filePath);
         
         if (result.success) {
           allTransactions.push(...result.transactions);
+          const fileTotal = result.calculatedTotal || 0;
+          grandTotal += fileTotal;
+
           if (result.transactions.length > 0 && result.transactions[0].cardNumber) {
             cardNumbers.add(result.transactions[0].cardNumber);
           }
@@ -61,10 +66,10 @@ program
             if (result.isValidTotal) {
               console.log(`✅ ${file}: Validated (Total: ${result.statementTotal.toFixed(2)} €)`);
             } else {
-              console.warn(`⚠️  ${file}: Total mismatch! Expected: ${result.statementTotal.toFixed(2)} €, Calculated: ${result.calculatedTotal?.toFixed(2)} €`);
+              console.warn(`⚠️  ${file}: Total mismatch! Expected: ${result.statementTotal.toFixed(2)} €, Calculated: ${fileTotal.toFixed(2)} €`);
             }
           } else {
-            console.log(`✅ ${file}: Processed (${result.transactions.length} transactions)`);
+            console.log(`✅ ${file}: Processed (${result.transactions.length} transactions, Total: ${fileTotal.toFixed(2)} €)`);
           }
 
           // Move processed file
@@ -93,7 +98,8 @@ program
       console.log('\n--- Summary ---');
       console.log(`✅ Success! Generated: ${excelPath}`);
       console.log(`📊 Total transactions: ${allTransactions.length}`);
-      console.log(`💳 Cards found: ${Array.from(cardNumbers).join(', ') || 'Unknown'}`);
+      console.log(`💰 Grand Total: ${grandTotal.toFixed(2)} €`);
+      console.log(`💳 Cards found: ${cardSummary}`);
       console.log('----------------\n');
 
     } catch (error) {
