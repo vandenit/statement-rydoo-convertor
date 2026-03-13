@@ -27,9 +27,12 @@ describe('generateExcel', () => {
 
     const workbook = XLSX.readFile(testOutputPath);
     const sheet = workbook.Sheets['Transactions'];
-    const headers = XLSX.utils.sheet_to_json(sheet, { header: 1 })[0] as string[];
+    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as string[][];
+    const header1 = rows[0];
+    const header2 = rows[1];
 
-    expect(headers).toEqual([
+    expect(header1).toContain('Date of transaction (required)');
+    expect(header2).toEqual([
       'TransactionDate',
       'Amount',
       'Merchant',
@@ -54,9 +57,9 @@ describe('generateExcel', () => {
 
     const workbook = XLSX.readFile(testOutputPath);
     const sheet = workbook.Sheets['Transactions'];
-    const data = XLSX.utils.sheet_to_json(sheet)[0] as Record<string, unknown>;
+    const data = XLSX.utils.sheet_to_json(sheet, { range: 1, raw: false })[0] as Record<string, unknown>;
 
-    expect(data.TransactionDate).toBe('3/12/2024');
+    expect(data.TransactionDate).toMatch(/3\/12\/(20)?24/);
   });
 
   it('should use card number from PDF', () => {
@@ -73,7 +76,7 @@ describe('generateExcel', () => {
 
     const workbook = XLSX.readFile(testOutputPath);
     const sheet = workbook.Sheets['Transactions'];
-    const data = XLSX.utils.sheet_to_json(sheet)[0] as Record<string, unknown>;
+    const data = XLSX.utils.sheet_to_json(sheet, { range: 1, raw: false })[0] as Record<string, unknown>;
 
     expect(data.CardNumber).toBe('8204');
   });
@@ -92,7 +95,7 @@ describe('generateExcel', () => {
 
     const workbook = XLSX.readFile(testOutputPath);
     const sheet = workbook.Sheets['Transactions'];
-    const data = XLSX.utils.sheet_to_json(sheet)[0] as Record<string, unknown>;
+    const data = XLSX.utils.sheet_to_json(sheet, { range: 1, raw: false })[0] as Record<string, unknown>;
 
     expect(data.AccountCurrency).toBe('EUR');
   });
@@ -111,10 +114,10 @@ describe('generateExcel', () => {
 
     const workbook = XLSX.readFile(testOutputPath);
     const sheet = workbook.Sheets['Transactions'];
-    const data = XLSX.utils.sheet_to_json(sheet)[0] as Record<string, unknown>;
+    const data = XLSX.utils.sheet_to_json(sheet, { range: 1, raw: false })[0] as Record<string, unknown>;
 
     expect(data.CurrencyCode).toBe('USD');
-    expect(data.AccountAmount).toBe(-45.0);
+    expect(data.AccountAmount).toBe('-45');
   });
 
   it('should handle multiple transactions', () => {
@@ -143,11 +146,12 @@ describe('generateExcel', () => {
 
     const workbook = XLSX.readFile(testOutputPath);
     const sheet = workbook.Sheets['Transactions'];
-    const data = XLSX.utils.sheet_to_json(sheet) as Record<string, unknown>[];
+    // Use raw: false to get formatted strings, and range: 1 to skip the descriptive header row
+    const data = XLSX.utils.sheet_to_json(sheet, { range: 1, raw: false }) as Record<string, unknown>[];
 
     expect(data).toHaveLength(3);
     expect(data[0].Merchant).toBe('STORE 1');
     expect(data[1].CurrencyCode).toBe('GBP');
-    expect(data[2].Amount).toBe(15.0);
+    expect(data[2].Amount).toBe('15');
   });
 });

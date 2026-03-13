@@ -77,7 +77,8 @@ program
       const excelPath = path.join(outputPath, `statements-${dateStr}.xlsx`);
       
       const generator = new ExcelGenerator();
-      generator.generate(allTransactions, excelPath);
+      const cardSummary = Array.from(cardNumbers).join(', ') || 'Unknown';
+      generator.generate(allTransactions, cardSummary, excelPath);
 
       console.log('\n--- Summary ---');
       console.log(`✅ Success! Generated: ${excelPath}`);

@@ -40,12 +40,31 @@ export function parseAmount(amountStr: string): number | null {
     return null;
   }
 
-  // Remove spaces and dots (thousand separators)
-  // Handle both regular spaces, dots, and non-breaking spaces
-  let cleaned = trimmed.replace(/[\s\.]+/g, '');
+  // Determine if we should treat dot as decimal or thousand separator
+  // If there's a comma, dots are definitely thousand separators
+  const hasComma = trimmed.includes(',');
+  const hasDot = trimmed.includes('.');
 
-  // Replace comma decimal with period
-  cleaned = cleaned.replace(',', '.');
+  let cleaned = trimmed.replace(/\s+/g, ''); // Always remove spaces
+
+  if (hasComma) {
+    // Dots are thousand separators, remove them
+    cleaned = cleaned.replace(/\./g, '');
+    // Replace comma with period for parseFloat
+    cleaned = cleaned.replace(',', '.');
+  } else if (hasDot) {
+    // If multiple dots, all but the last are likely thousand separators
+    // If one dot, treat as decimal (fallback for English format)
+    const parts = cleaned.split('.');
+    if (parts.length > 2) {
+      // Multiple dots: 1.234.567 or 1.234.56
+      // Strip all dots
+      cleaned = cleaned.replace(/\./g, '');
+    } else {
+      // Exactly one dot: 19.00 or 1234.5
+      // Keep it as decimal
+    }
+  }
 
   // Parse the number
   const value = parseFloat(cleaned);
