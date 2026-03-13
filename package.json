@@ -1,6 +1,6 @@
 {
   "name": "statement-convertor",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Convert bank statement PDFs to Excel format",
   "main": "dist/index.js",
   "type": "module",
