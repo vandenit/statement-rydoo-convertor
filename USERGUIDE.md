@@ -1,6 +1,6 @@
 # Gebruikershandleiding: Statement Convertor
 
-Welkom bij de **Statement Convertor**. Deze tool is ontworpen om PDF-uittreksels van BNP Paribas Fortis (en bpost bank) snel en foutloos om te zetten naar een Excel-bestand dat direct geïmporteerd kan worden in Rydoo.
+Welkom bij de **Statement Convertor**. Deze tool is ontworpen om PDF-uittreksels van BNP Paribas Fortis snel en foutloos om te zetten naar een Excel-bestand dat direct geïmporteerd kan worden in Rydoo.
 
 ---
 
