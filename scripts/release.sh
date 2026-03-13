@@ -19,6 +19,11 @@ echo "🔍 Running pre-release checks (types & tests)..."
 npm run check
 echo "✅ Checks passed!"
 
+# Verify that the binary can be built and actually works
+echo "🏗️  Running binary smoke test (E2E PDF parsing)..."
+npm run test:binary
+echo "✅ Binary verified!"
+
 # Use npm version to update package.json and package-lock.json
 # --no-git-tag-version lets us handle the commit and tag ourselves for better control
 NEW_VERSION=$(npm version $VERSION_TYPE --no-git-tag-version)
