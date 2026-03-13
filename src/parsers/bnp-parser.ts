@@ -57,12 +57,15 @@ export class BnpParser extends BaseParser {
   private static readonly TABLE_HEADER_MARKER = 'Date de transaction';
   private static readonly TABLE_FOOTER_MARKERS = [
     'SOLDE ACTUEL',
-    'TOTAL DES DEPENSES',
-    'Total des dépenses',
     'Votre résultat',
     'Résultat du compte',
   ];
 
+  // Date patterns for transactions
+  private static readonly FULL_DATE_PATTERN = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
+  private static readonly SHORT_DATE_PATTERN = /^(\d{2})\/(\d{2})(?:\s+(\d{2})\/(\d{2}))?/;
+  private static readonly EUR_PATTERN = /(-?[\d\s\.]*,?\d{2})\s*(?:€|EUR)\s*$/i;
+  private static readonly AMOUNT_PATTERN = /(-?\d[\d\s\.]*,\d{2}(?:\s*(?:[A-Z]{3}|[€$£¥]))?)\s*$/;
   /**
    * Check if this parser can handle the given PDF content
    *
@@ -380,8 +383,7 @@ export class BnpParser extends BaseParser {
     let afterDate = '';
 
     // 1. Try to extract full date from the beginning (e.g., "12 mars 2024")
-    const fullDatePattern = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
-    const fullDateMatch = cleaned.match(fullDatePattern);
+    const fullDateMatch = cleaned.match(BnpParser.FULL_DATE_PATTERN);
 
     if (fullDateMatch) {
       const dateStr = fullDateMatch[1];
@@ -389,11 +391,10 @@ export class BnpParser extends BaseParser {
       date = parseFrenchDate(dateStr);
     } else {
       // 2. Try to extract short date (e.g., "04/02 05/02")
-      const shortDatePattern = /^(\d{2})\/(\d{2})(?:\s+(\d{2})\/(\d{2}))?/;
-      const shortDateMatch = cleaned.match(shortDatePattern);
+      const shortDateMatch = cleaned.match(BnpParser.SHORT_DATE_PATTERN);
 
       if (shortDateMatch) {
-        const day = parseInt(shortDateMatch[1], 10);
+      const day = parseInt(shortDateMatch[1], 10);
         const month = parseInt(shortDateMatch[2], 10);
         let year = 2026; // Default to 2026 for this specific PDF set
         date = new Date(year, month - 1, day);
@@ -405,16 +406,12 @@ export class BnpParser extends BaseParser {
       return null;
     }
 
-    // Amount patterns
-    const amountPattern = /(-?\d[\d\s\.]*,\d{2}(?:\s*(?:[A-Z]{3}|[€$£¥]))?)\s*$/;
-    const eurPattern = /(-?[\d\s\.]*,?\d{2})\s*(?:€|EUR)\s*$/i;
-
-    let amountMatch = afterDate.match(amountPattern);
+    let amountMatch = afterDate.match(BnpParser.AMOUNT_PATTERN);
     let linesConsumed = 1;
 
     // If amount not on current line, try next line
     if (!amountMatch && nextLine) {
-      amountMatch = nextLine.trim().match(amountPattern);
+      amountMatch = nextLine.trim().match(BnpParser.AMOUNT_PATTERN);
       if (amountMatch) {
         linesConsumed = 2;
       }
@@ -451,8 +448,14 @@ export class BnpParser extends BaseParser {
       
       const filteredLines = linesToCheck.filter(Boolean) as string[];
       for (const next of filteredLines) {
-        const match = next.trim().match(eurPattern);
-        if (match) {
+        const trimmedNext = next.trim();
+        // If the next line looks like a new transaction (starts with a date), stop looking
+        if (trimmedNext.match(BnpParser.FULL_DATE_PATTERN) || trimmedNext.match(BnpParser.SHORT_DATE_PATTERN)) {
+          break;
+        }
+
+        const match = trimmedNext.match(BnpParser.EUR_PATTERN);
+      if (match) {
           const parsedEur = parseAmountWithCurrency(match[0]);
           if (parsedEur) {
             eurAmount = parsedEur.amount;
