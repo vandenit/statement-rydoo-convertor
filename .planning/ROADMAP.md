@@ -196,6 +196,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 | 7 - Bugfixes (Amount & Date)      | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 | 8 - Final Polish & Multi-file     | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 | 9 - macOS Distribution            | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 10 - CI/CD & GitHub Releases       | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 
 **Legend:**
 
@@ -263,6 +264,8 @@ Phase 7 (Bugfixes)
 Phase 8 (Final Polish)
     ↓
 Phase 9 (macOS Distribution)
+    ↓
+Phase 10 (CI/CD & Releases)
 ```
 
 Linear dependency chain — each phase builds on the previous.

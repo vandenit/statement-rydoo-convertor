@@ -13,23 +13,23 @@ A portable command-line tool to convert bank statement PDFs (specifically BNP Pa
 - `output/`: The generated Excel file (`statements-YYYY-MM-DD.xlsx`) will appear here.
 - `processed/`: PDFs are moved here after successful conversion.
 
-## Usage
+---
 
-### Windows
-1. Open the `dist-exe/` folder.
-2. Run `statement-convertor.exe`.
-3. Check the `output/` folder for your Excel file.
+## Usage (for Users/Clients)
 
-### macOS
-1. Open the `dist-macos/` folder.
-2. Use the version matching your Mac:
-   - Intel Macs: `statement-convertor-x64`
-   - Apple Silicon (M1/M2/M3): `statement-convertor-arm64`
-3. **First-time run**: Since the app is not signed, you might need to Right-click -> Open, or run `codesign --sign - <path_to_binary>` in the terminal.
+### Recommended: GitHub Releases
+The easiest way to get the latest version is to download the portable binaries from the **[Releases](https://github.com/vandenit/statement-convertor/releases)** page on GitHub.
+- `statement-convertor-win.exe` (Windows)
+- `statement-convertor-macos-x64` (Mac Intel)
+- `statement-convertor-macos-arm64` (Mac M1/M2/M3)
+
+### Operating System Notes
+- **Windows**: Just run the `.exe`. 
+- **macOS**: Since the app is not signed, you might need to **Right-click -> Open** on the first launch, or run `codesign --sign - <path_to_binary>` in the terminal to authorize it.
 
 ---
 
-## Developer Instructions
+## Technical Documentation (for Developers)
 
 ### Prerequisites
 - Node.js (v18 or higher)
@@ -58,9 +58,8 @@ npm run build:exe
 npm run build:macos
 ```
 
-## Delivery
-To deliver the latest version to a client:
-1. Run `npm run build:exe` and `npm run build:macos`.
-2. Send the content of `dist-exe/` (for Windows users).
-3. Send the content of `dist-macos/` (for Mac users).
-4. (Optional) Provide the `input/`, `output/`, and `processed/` folders as a template.
+### Automation & Deployment
+- **CI/CD**: A GitHub Action is configured to automatically build and create a GitHub Release whenever a tag (e.g., `v1.1.0`) is pushed to the repository.
+- **Manual Delivery**: 
+  1. Run `npm run build:exe` and `npm run build:macos`.
+  2. Send the binaries from `dist-exe/` and `dist-macos/` to the client.

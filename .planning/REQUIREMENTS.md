@@ -116,6 +116,7 @@
 | Phase 7 | BUG-01, BUG-02           | Bugfixes — correct amount and date parsing for specific cases       |
 | Phase 8 | BUG-03, FEAT-01, FEAT-02 | 🟢 Completed | Final Polish — multi-file aggregation, sorting, and header fixes    |
 | Phase 9 | DIST-02                  | 🟢 Completed | macOS Distribution — portable macOS executables (x64 & arm64)        |
+| Phase 10| DIST-03                  | 🟢 Completed | CI/CD & Releases — automated builds via GitHub Actions               |
 
 ---
 
