@@ -25,14 +25,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm run build
+      - name: Build and Bundle
+        run: npm run bundle
 
       - name: Create Windows binary
-        run: npx pkg . --targets node18-win-x64 --out-path ./dist-exe
+        run: npx pkg dist/bundle.cjs --targets node18-win-x64 --out-path ./dist-exe --output statement-convertor.exe
 
       - name: Create macOS binaries
-        run: npx pkg . --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos
+        run: npx pkg dist/bundle.cjs --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos
 
       - name: Rename binaries for release
         run: |

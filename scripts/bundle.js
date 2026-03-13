@@ -18,7 +18,8 @@ async function bundle() {
     minify: false,
     sourcemap: true,
     mainFields: ['module', 'main'],
-    // We bundle everything to make it a single portable file
+    external: ['pdf-parse', 'xlsx', 'commander'],
+    // We bundle everything except large/problematic libraries
   });
   
   console.log('Bundle created at dist/bundle.cjs');

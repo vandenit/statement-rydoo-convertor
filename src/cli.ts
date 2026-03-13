@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import './polyfills.js';
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -19,70 +20,75 @@ program
   .option('-p, --processed <path>', 'Processed folder (default: processed/)', 'processed')
   .option('-b, --bank <bank>', 'Bank type (bnp, etc.)', 'bnp')
   .action(async (options) => {
-    const inputDir = path.resolve(options.input);
-    const outputDir = path.resolve(options.output);
-    const processedDir = path.resolve(options.processed);
+    try {
+      const inputPath = path.resolve(options.input);
+      const outputPath = path.resolve(options.output);
+      const processedPath = path.resolve(options.processed);
 
-    // Ensure directories exist
-    [inputDir, outputDir, processedDir].forEach(dir => {
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+      // Create folders if they don't exist
+      for (const p of [inputPath, outputPath, processedPath]) {
+        if (!fs.existsSync(p)) {
+          fs.mkdirSync(p, { recursive: true });
+        }
       }
-    });
 
-    const files = fs.readdirSync(inputDir).filter(f => f.toLowerCase().endsWith('.pdf'));
+      console.log(`🔍 Scanning ${inputPath} for PDF files...`);
 
-    if (files.length === 0) {
-      console.log('No PDF files found in input directory.');
-      return;
-    }
+      const files = fs.readdirSync(inputPath).filter(f => f.toLowerCase().endsWith('.pdf'));
 
-    console.log(`Found ${files.length} files to process.`);
-    const converter = new StatementConverter();
-    const allTransactions = [];
-    let successCount = 0;
-
-    for (const file of files) {
-      const pdfPath = path.join(inputDir, file);
-      console.log(`Processing: ${file}...`);
-      
-      const result = await converter.convert(pdfPath, outputDir);
-
-      if (result.success) {
-        console.log(`  ✓ Extracted ${result.transactionCount} transactions.`);
-        allTransactions.push(...result.transactions);
-        successCount++;
-        // Move to processed
-        const targetPath = path.join(processedDir, file);
-        fs.renameSync(pdfPath, targetPath);
-      } else {
-        console.error(`  ✗ Error: ${result.error}`);
+      if (files.length === 0) {
+        console.log('❌ No PDF files found in input folder.');
+        return;
       }
-    }
 
-    if (allTransactions.length > 0) {
-      // Sort by date (ascending)
+      console.log(`📄 Found ${files.length} files. Starting conversion...`);
+
+      const converter = new StatementConverter();
+      const allTransactions = [];
+      const cardNumbers = new Set<string>();
+
+      for (const file of files) {
+        const filePath = path.join(inputPath, file);
+        const result = await converter.convert(filePath);
+        
+        if (result.success) {
+          allTransactions.push(...result.transactions);
+          if (result.transactions.length > 0 && result.transactions[0].cardNumber) {
+            cardNumbers.add(result.transactions[0].cardNumber);
+          }
+          
+          // Move processed file
+          fs.renameSync(filePath, path.join(processedPath, file));
+        } else {
+          console.error(`❌ Failed to convert ${file}: ${result.error}`);
+        }
+      }
+
+      if (allTransactions.length === 0) {
+        console.log('⚠️ No transactions found in any of the files.');
+        return;
+      }
+
+      // Sort transactions by date (ascending)
       allTransactions.sort((a, b) => a.date.getTime() - b.date.getTime());
 
-      // Generate single output filename with run date
-      const today = new Date().toISOString().split('T')[0];
-      const outputFilename = `statements-${today}.xlsx`;
-      const outputPath = path.join(outputDir, outputFilename);
-
-      console.log(`\nGenerating aggregated Excel: ${outputFilename}...`);
+      // Generate single Excel file with run date in name
+      const dateStr = new Date().toISOString().split('T')[0];
+      const excelPath = path.join(outputPath, `statements-${dateStr}.xlsx`);
+      
       const generator = new ExcelGenerator();
-      // Use the first transaction's card number as fallback if needed
-      const fallbackCard = allTransactions[0].cardNumber || 'unknown';
-      generator.generate(allTransactions, fallbackCard, outputPath);
-      console.log(`  ✓ Created ${outputFilename} with ${allTransactions.length} total transactions.`);
-    }
+      generator.generate(allTransactions, excelPath);
 
-    // Summary
-    console.log('\n--- Summary ---');
-    console.log(`Total PDF files: ${files.length}`);
-    console.log(`Successfully processed: ${successCount}`);
-    console.log(`Failed:                 ${files.length - successCount}`);
-    console.log('----------------\n');
+      console.log('\n--- Summary ---');
+      console.log(`✅ Success! Generated: ${excelPath}`);
+      console.log(`📊 Total transactions: ${allTransactions.length}`);
+      console.log(`💳 Cards found: ${Array.from(cardNumbers).join(', ') || 'Unknown'}`);
+      console.log('----------------\n');
+
+    } catch (error) {
+      console.error(`💥 Fatal error: ${error instanceof Error ? error.message : String(error)}`);
+      process.exit(1);
+    }
   });
 
-program.parse();
+program.parse(process.argv);
