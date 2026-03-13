@@ -305,23 +305,11 @@ export class BnpParser extends BaseParser {
 
       // Try to parse this as a transaction line
       // Pass potential next lines for lookahead
-      const transaction = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
+      const parseResult = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
 
-      if (transaction) {
-        transactions.push(transaction);
-
-        // If this was a multi-line transaction, skip the consumed lines
-        let linesToSkip = 1;
-        if (transaction.originalCurrency && transaction.originalCurrency !== 'EUR') {
-          // Lookahead for exchange rate and EUR amount
-          if (lines[i + 1] && isExchangeRateLine(lines[i + 1])) linesToSkip++;
-          // Check if the EUR amount was also found on next/following line
-          // (We'll simplify and say if it's foreign, we skip up to 2 extra lines if they match patterns)
-          if (lines[i + linesToSkip] && lines[i + linesToSkip].trim().match(/^-?[\d\s]*,?\d{2}\s*€\s*$/)) {
-            linesToSkip++;
-          }
-        }
-        i += linesToSkip;
+      if (parseResult) {
+        transactions.push(parseResult.transaction);
+        i += parseResult.linesConsumed;
         continue;
       }
 
@@ -376,7 +364,11 @@ export class BnpParser extends BaseParser {
    * @param followingLine - Line after next (to check for EUR amount)
    * @returns Transaction object or null if not a valid transaction
    */
-  private parseTransactionLine(line: string, nextLine?: string, followingLine?: string): Transaction | null {
+  private parseTransactionLine(
+    line: string,
+    nextLine?: string,
+    followingLine?: string
+  ): { transaction: Transaction; linesConsumed: number } | null {
     // Clean the line: remove pipe characters used in table format
     let cleaned = line.trim().replace(/\|/g, '').trim();
 
@@ -413,55 +405,83 @@ export class BnpParser extends BaseParser {
       return null;
     }
 
-    // Amount pattern at the end
-    // Supports dots as thousand separators and spaces
+    // Amount patterns
     const amountPattern = /(-?\d[\d\s\.]*,\d{2}(?:\s*(?:[A-Z]{3}|[€$£¥]))?)\s*$/;
+    const eurPattern = /(-?[\d\s\.]*,?\d{2})\s*(?:€|EUR)\s*$/i;
+
     let amountMatch = afterDate.match(amountPattern);
+    let linesConsumed = 1;
+
+    // If amount not on current line, try next line
+    if (!amountMatch && nextLine) {
+      amountMatch = nextLine.trim().match(amountPattern);
+      if (amountMatch) {
+        linesConsumed = 2;
+      }
+    }
 
     if (!amountMatch) {
       return null;
     }
 
     let amountStr = amountMatch[1].trim();
-    let beforeAmount = afterDate.slice(0, afterDate.length - amountMatch[0].length).trim();
+    
+    // If the amount was found on the same line, the description is what's before it
+    // If the amount was on the next line, the description is everything after the date on the current line
+    let description = (linesConsumed === 1) 
+      ? afterDate.slice(0, afterDate.length - amountMatch[0].length).trim()
+      : afterDate.trim();
+
     let parsedAmount = parseAmountWithCurrency(amountStr);
 
     if (!parsedAmount) {
       return null;
     }
 
-    // Multi-line foreign currency handling
     let eurAmount = parsedAmount.amount;
     let currency = parsedAmount.currency;
 
+    // Handle foreign currency (multi-line)
     if (currency && currency !== 'EUR') {
-      // Look for the actual EUR amount on the next lines
-      const eurPattern = /(-?[\d\s\.]*,?\d{2})\s*(?:€|EUR)\s*$/i;
+      // If we consumed 1 line, look in nextLine and followingLine
+      // If we consumed 2 lines (date on L1, foreign amount on L2), look in followingLine
+      const linesToCheck = linesConsumed === 1 
+        ? [nextLine, followingLine]
+        : [followingLine];
       
-      // Check nextLine and followingLine
-      const linesToCheck = [nextLine, followingLine].filter(Boolean) as string[];
-      for (const next of linesToCheck) {
+      const filteredLines = linesToCheck.filter(Boolean) as string[];
+      for (const next of filteredLines) {
         const match = next.trim().match(eurPattern);
         if (match) {
           const parsedEur = parseAmountWithCurrency(match[0]);
           if (parsedEur) {
             eurAmount = parsedEur.amount;
+            // We consume one more line if we found the EUR amount on a fresh line
+            if (next === nextLine) linesConsumed = Math.max(linesConsumed, 2);
+            if (next === followingLine) linesConsumed = 3;
             break;
           }
+        }
+        // Also skip exchange rate line if it exists
+        if (isExchangeRateLine(next)) {
+           if (next === nextLine) linesConsumed = Math.max(linesConsumed, 2);
+           if (next === followingLine) linesConsumed = 3;
         }
       }
     }
 
-    const description = beforeAmount.trim();
     if (!description || description.length < 2) {
       return null;
     }
 
     return {
-      date,
-      description,
-      amount: eurAmount,
-      originalCurrency: currency,
+      transaction: {
+        date,
+        description,
+        amount: eurAmount,
+        originalCurrency: currency,
+      },
+      linesConsumed
     };
   }
 

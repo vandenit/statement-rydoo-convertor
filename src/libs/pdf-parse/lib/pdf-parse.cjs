@@ -8,15 +8,24 @@ function render_page(pageData) {
 
     return pageData.getTextContent(render_options)
         .then(function(textContent) {
-            let lastY, text = '';
+            let lastY, lastX, text = '';
             for (let item of textContent.items) {
-                if (lastY == item.transform[5] || !lastY){
+                const currentY = item.transform[5];
+                const currentX = item.transform[4];
+                
+                // If same Y (with small tolerance)
+                if (Math.abs(lastY - currentY) < 1 || !lastY) {
+                    // Add space if there's a horizontal gap
+                    if (lastX !== undefined && currentX > lastX + 2) {
+                        text += ' ';
+                    }
                     text += item.str;
                 }  
-                else{
+                else {
                     text += '\n' + item.str;
                 }    
-                lastY = item.transform[5];
+                lastY = currentY;
+                lastX = currentX + (item.width || 0);
             }            
             return text;
         });
