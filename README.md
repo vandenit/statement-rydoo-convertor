@@ -59,7 +59,14 @@ npm run build:macos
 ```
 
 ### Automation & Deployment
-- **CI/CD**: A GitHub Action is configured to automatically build and create a GitHub Release whenever a tag (e.g., `v1.1.0`) is pushed to the repository.
+- **Automated Release (Recommended)**:
+  Run the provided release script to bump the version, tag, and push to GitHub:
+  ```bash
+  npm run release        # Defaults to minor update (0.1.0 -> 0.2.0)
+  npm run release patch  # For patch update (0.1.0 -> 0.1.1)
+  ```
+  GitHub Actions will then automatically build and create a GitHub Release.
+
 - **Manual Delivery**: 
   1. Run `npm run build:exe` and `npm run build:macos`.
   2. Send the binaries from `dist-exe/` and `dist-macos/` to the client.

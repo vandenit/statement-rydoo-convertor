@@ -14,7 +14,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "build:exe": "npm run build && npx pkg . --targets node18-win-x64 --out-path ./dist-exe",
-    "build:macos": "npm run build && npx pkg . --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos"
+    "build:macos": "npm run build && npx pkg . --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos",
+    "release": "./scripts/release.sh"
   },
   "bin": {
     "statement-convertor": "./dist/cli.js"
