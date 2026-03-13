@@ -37,8 +37,8 @@ jobs:
       - name: Rename binaries for release
         run: |
           mv dist-exe/statement-convertor.exe statement-convertor-win.exe
-          mv dist-macos/statement-convertor-x64 statement-convertor-macos-x64
-          mv dist-macos/statement-convertor-arm64 statement-convertor-macos-arm64
+          mv dist-macos/bundle-x64 statement-convertor-macos-x64
+          mv dist-macos/bundle-arm64 statement-convertor-macos-arm64
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
