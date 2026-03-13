@@ -25,30 +25,49 @@ export interface ExcelOptions {
  */
 export function generateExcel(
   transactions: Transaction[],
-  cardNumber: string,
+  cardNumberFallback: string,
   options: ExcelOptions
 ): void {
-  // Format date as M/D/YYYY (e.g., "3/12/2024")
-  const formatDate = (date: Date): string => {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const year = date.getFullYear();
-    return `${month}/${day}/${year}`;
-  };
+  // Build header rows
+  const headerRow1 = [
+    'Date of transaction (required)',
+    'Original transaction amount (required)',
+    'Merchant name (required)',
+    'Original currency code (required)',
+    'Enter the last four digits of the card ONLY (required)',
+    'Billed currency in bank  statement (required)',
+    'Billed amount in bank statement (required)',
+    'Please do not remove this row or change the order of columns.',
+  ];
+
+  const headerRow2 = [
+    'TransactionDate',
+    'Amount',
+    'Merchant',
+    'CurrencyCode',
+    'CardNumber',
+    'AccountCurrency',
+    'AccountAmount',
+  ];
 
   // Build row data
-  const rows = transactions.map((t) => ({
-    TransactionDate: formatDate(t.date),
-    Amount: t.amount,
-    Merchant: t.description,
-    CurrencyCode: t.originalCurrency || 'EUR',
-    CardNumber: cardNumber,
-    AccountCurrency: 'EUR',
-    AccountAmount: t.amount,
-  }));
+  const dataRows = transactions.map((t) => [
+    t.date,
+    t.amount,
+    t.description,
+    t.originalCurrency || 'EUR',
+    t.cardNumber || cardNumberFallback,
+    'EUR',
+    t.amount,
+  ]);
 
-  // Create workbook and worksheet
-  const worksheet = XLSX.utils.json_to_sheet(rows);
+  // Combine headers and data
+  const allRows = [headerRow1, headerRow2, ...dataRows];
+
+  // Create worksheet from Array of Arrays (AOA)
+  const worksheet = XLSX.utils.aoa_to_sheet(allRows, { cellDates: true });
+
+  // Create workbook
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, options.sheetName || 'Transactions');
 

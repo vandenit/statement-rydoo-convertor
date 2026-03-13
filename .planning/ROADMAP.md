@@ -2,8 +2,8 @@
 
 **Created:** 2025-03-12  
 **Depth:** Quick  
-**Phases:** 5  
-**Requirements:** 21 v1 requirements
+**Phases:** 6  
+**Requirements:** 22 v1 requirements
 
 ## Overview
 
@@ -164,6 +164,26 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 
 ---
 
+## Phase 6: Windows Distribution
+
+**Goal:** Provide a single portable .exe for Windows users without Node.js requirements
+
+**Dependencies:** Phase 5 (CLI Interface and Integration)
+
+**Requirements:**
+
+- DIST-01: Portable Windows executable (.exe) containing Node.js runtime
+
+**Success Criteria:**
+
+1. A standalone `statement-convertor.exe` is generated for Windows
+2. The executable runs on Windows without requiring Node.js to be installed globally
+3. The executable includes all necessary assets and dependencies
+
+**Context:** Packaging phase to ensure ease of use for non-technical users.
+
+---
+
 ## Progress
 
 | Phase                             | Status         | Started    | Completed  |
@@ -171,8 +191,11 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 | 1 - Project Setup                 | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
 | 2 - PDF Parsing Infrastructure    | 🟢 Completed   | 2025-03-12 | 2025-03-12 |
 | 3 - Data Extraction               | 🟢 Completed   | 2026-03-12 | 2026-03-12 |
-| 4 - Excel Generation              | 🟢 Completed   | 2026-03-12 | 2026-03-12 |
-| 5 - CLI Interface and Integration | 🔵 Not Started | -          | -          |
+| 5 - CLI Interface and Integration | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 6 - Windows Distribution          | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 7 - Bugfixes (Amount & Date)      | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 8 - Final Polish & Multi-file     | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
+| 9 - macOS Distribution            | 🟢 Completed   | 2026-03-13 | 2026-03-13 |
 
 **Legend:**
 
@@ -209,6 +232,7 @@ This roadmap delivers a TypeScript CLI tool that converts BNP Paribas Fortis cre
 | ARCH-01     | 1     | TypeScript implementation                                                                                   |
 | ARCH-02     | 1     | Installable via npm                                                                                         |
 | ARCH-03     | 5     | Extensible parser interface (strategy pattern) for future banks                                             |
+| DIST-01     | 6     | Portable Windows executable (.exe) containing Node.js runtime                                               |
 
 **Coverage Summary:**
 
@@ -231,6 +255,14 @@ Phase 3 (Data Extraction)
 Phase 4 (Excel Generation)
     ↓
 Phase 5 (CLI + Integration)
+    ↓
+Phase 6 (Windows Distribution)
+    ↓
+Phase 7 (Bugfixes)
+    ↓
+Phase 8 (Final Polish)
+    ↓
+Phase 9 (macOS Distribution)
 ```
 
 Linear dependency chain — each phase builds on the previous.

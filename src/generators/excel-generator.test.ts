@@ -1,8 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { generateExcel } from './excel-generator';
+import { generateExcel } from './excel-generator.js';
 import * as XLSX from 'xlsx';
 import * as fs from 'fs';
-import type { Transaction } from '../types/transaction';
+import type { Transaction } from '../types/transaction.js';
 
 describe('generateExcel', () => {
   const testOutputPath = '/tmp/test-output.xlsx';

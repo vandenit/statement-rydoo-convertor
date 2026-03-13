@@ -10,14 +10,13 @@ Users can convert credit card statements to Rydoo format without manual data ent
 
 ## Current Position
 
-**Current Phase:** 4 — Excel Generation  
-**Current Plan:** 04-02  
-**Status:** Phase Complete (2/2 plans complete)
+**Current Phase:** Project Complete  
+**Status:** Completed v1 Goals
 
 ### Phase Progress
 
 ```
-[████████████████████] 100% Overall (5/5 phases completed)
+[████████████████████] 100% Overall (6/6 phases completed)
 ```
 
 **Phase Status:**
@@ -27,13 +26,21 @@ Users can convert credit card statements to Rydoo format without manual data ent
 | 2 - PDF Parsing Infrastructure | 100% | 🟢 Completed |
 | 3 - Data Extraction | 100% | 🟢 Completed |
 | 4 - Excel Generation | 100% | 🟢 Completed |
-| 5 - CLI Interface and Integration | 0% | 🔵 Not Started |
+| 5 - CLI Interface and Integration | 100% | 🟢 Completed |
+| 6 - Windows Distribution | 100% | 🟢 Completed |
 
 ## Current Focus
 
-**Immediate Next Step:** Execute 05-01-PLAN.md — CLI Interface and Integration
+**Status:** v1 Delivery Ready
 
-**Phase 4 Complete:** ✓ Excel Generation
+**Phase 6 Complete:** ✓ Windows Distribution
+- Plan 06-01: Configure `pkg` for standalone .exe generation
+- Created `dist-exe/statement-convertor.exe`
+
+**Phase 5 Complete:** ✓ CLI Interface & Integration
+- Plan 05-01: Orchestrate folder-based workflow
+- Created `src/orchestrator/converter.ts` and updated `src/cli.ts`
+- Verified auto-move from `input/` to `processed/`
 
 - Plan 04-01: Install xlsx library and create ExcelGenerator class
 - Plan 04-02: Create test suite for Excel generation

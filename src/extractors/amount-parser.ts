@@ -40,9 +40,9 @@ export function parseAmount(amountStr: string): number | null {
     return null;
   }
 
-  // Remove spaces (thousand separators)
-  // Handle both regular spaces and non-breaking spaces
-  let cleaned = trimmed.replace(/\s+/g, '');
+  // Remove spaces and dots (thousand separators)
+  // Handle both regular spaces, dots, and non-breaking spaces
+  let cleaned = trimmed.replace(/[\s\.]+/g, '');
 
   // Replace comma decimal with period
   cleaned = cleaned.replace(',', '.');

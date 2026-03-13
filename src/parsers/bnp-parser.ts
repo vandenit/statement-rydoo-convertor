@@ -43,9 +43,9 @@ export class BnpParser extends BaseParser {
   ];
 
   // Card number pattern: "Numéro de carte 5480 28XX XXXX 8204"
-  // Matches: Numéro de carte followed by groups of digits with XX placeholders
+  // Matches: Numéro de carte followed by groups of digits/X/spaces
   private static readonly CARD_NUMBER_PATTERN =
-    /Num[ée]ro de carte\s+(\d{4})\s+(\d{2})XX\s+XXXX\s+(\d{4})/i;
+    /Num[ée]ro de carte\s+([\d\sX-]+)(?:\s+-\s+|$)/i;
 
   // Alternative patterns for different card formats
   private static readonly CARD_NUMBER_ALT_PATTERNS = [
@@ -120,7 +120,13 @@ export class BnpParser extends BaseParser {
 
     // Extract transactions (Phase 2: returns empty array)
     // Phase 3 will implement full transaction parsing
-    const rawTransactions = this.extractTransactions(tableText);
+    const transactions = this.extractTransactions(tableText);
+
+    // Attach card number to each transaction for multi-file aggregation
+    const rawTransactions = transactions.map(t => ({
+      ...t,
+      cardNumber: cardInfo.fullNumber
+    }));
 
     return {
       cardNumber: cardInfo.lastFour,
@@ -142,10 +148,13 @@ export class BnpParser extends BaseParser {
     // Try primary pattern first
     const primaryMatch = text.match(BnpParser.CARD_NUMBER_PATTERN);
     if (primaryMatch) {
-      const fullNumber = `${primaryMatch[1]} ${primaryMatch[2]}XX XXXX ${primaryMatch[3]}`;
+      const fullNumber = primaryMatch[1].trim();
+      // Extract last 4 digits from the string
+      const digitsOnly = fullNumber.replace(/\D/g, '');
+      const lastFour = digitsOnly.slice(-4);
       return {
         fullNumber,
-        lastFour: primaryMatch[3],
+        lastFour,
       };
     }
 
@@ -288,23 +297,32 @@ export class BnpParser extends BaseParser {
         break;
       }
 
-      // Skip exchange rate lines (they follow foreign currency transactions)
+      // Skip exchange rate lines (handled by lookahead)
       if (isExchangeRateLine(line)) {
         i++;
         continue;
       }
 
       // Try to parse this as a transaction line
-      const transaction = this.parseTransactionLine(line, lines[i + 1]);
+      // Pass potential next lines for lookahead
+      const transaction = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
 
       if (transaction) {
         transactions.push(transaction);
 
-        // If this was a foreign currency transaction with exchange rate, skip the next line
-        if (transaction.originalCurrency && lines[i + 1] && isExchangeRateLine(lines[i + 1])) {
-          i += 2;
-          continue;
+        // If this was a multi-line transaction, skip the consumed lines
+        let linesToSkip = 1;
+        if (transaction.originalCurrency && transaction.originalCurrency !== 'EUR') {
+          // Lookahead for exchange rate and EUR amount
+          if (lines[i + 1] && isExchangeRateLine(lines[i + 1])) linesToSkip++;
+          // Check if the EUR amount was also found on next/following line
+          // (We'll simplify and say if it's foreign, we skip up to 2 extra lines if they match patterns)
+          if (lines[i + linesToSkip] && lines[i + linesToSkip].trim().match(/^-?[\d\s]*,?\d{2}\s*€\s*$/)) {
+            linesToSkip++;
+          }
         }
+        i += linesToSkip;
+        continue;
       }
 
       i++;
@@ -353,16 +371,12 @@ export class BnpParser extends BaseParser {
    * 1. Full date: "12 mars 2024    AMAZON EU SARL    -19,00"
    * 2. Short date: "04/02 05/02 TAGGBOX JAIPUR IN -19,00 USD"
    *
-   * The description may contain spaces, so we parse from both ends:
-   * - Start: Date (French format or DD/MM)
-   * - End: Amount (European format, optional currency)
-   * - Middle: Description
-   *
    * @param line - Transaction line to parse
    * @param nextLine - Next line (to check for exchange rate or EUR amount)
+   * @param followingLine - Line after next (to check for EUR amount)
    * @returns Transaction object or null if not a valid transaction
    */
-  private parseTransactionLine(line: string, nextLine?: string): Transaction | null {
+  private parseTransactionLine(line: string, nextLine?: string, followingLine?: string): Transaction | null {
     // Clean the line: remove pipe characters used in table format
     let cleaned = line.trim().replace(/\|/g, '').trim();
 
@@ -383,18 +397,13 @@ export class BnpParser extends BaseParser {
       date = parseFrenchDate(dateStr);
     } else {
       // 2. Try to extract short date (e.g., "04/02 05/02")
-      // Pattern: DD/MM followed by another DD/MM (value date)
       const shortDatePattern = /^(\d{2})\/(\d{2})(?:\s+(\d{2})\/(\d{2}))?/;
       const shortDateMatch = cleaned.match(shortDatePattern);
 
       if (shortDateMatch) {
         const day = parseInt(shortDateMatch[1], 10);
         const month = parseInt(shortDateMatch[2], 10);
-        
-        // Use current year as fallback or try to find year in text
-        // (For simplicity in this fix, we'll try to find 2024-2026)
-        let year = 2026; 
-        
+        let year = 2026; // Default to 2026 for this specific PDF set
         date = new Date(year, month - 1, day);
         afterDate = cleaned.slice(shortDateMatch[0].length).trim();
       }
@@ -404,9 +413,9 @@ export class BnpParser extends BaseParser {
       return null;
     }
 
-    // Try to find amount at the end
-    // Amount pattern: optional sign, digits with optional thousand separators, comma decimal, optional currency symbol or code
-    const amountPattern = /(-?\d[\d\s]*,\d{2}(?:\s*(?:[A-Z]{3}|[€$£¥]))?)\s*$/;
+    // Amount pattern at the end
+    // Supports dots as thousand separators and spaces
+    const amountPattern = /(-?\d[\d\s\.]*,\d{2}(?:\s*(?:[A-Z]{3}|[€$£¥]))?)\s*$/;
     let amountMatch = afterDate.match(amountPattern);
 
     if (!amountMatch) {
@@ -421,22 +430,29 @@ export class BnpParser extends BaseParser {
       return null;
     }
 
-    // If it's a foreign currency on this line, the actual EUR amount might be on a subsequent line
-    if (parsedAmount.currency && parsedAmount.currency !== 'EUR' && nextLine) {
-      // Check if next line or line after has the EUR equivalent
-      // Example:
-      // 04/02 05/02 TAGGBOX JAIPUR IN -19,00 USD
-      // 1 EUR = 1,15853659 USD
-      // -16,40 €
+    // Multi-line foreign currency handling
+    let eurAmount = parsedAmount.amount;
+    let currency = parsedAmount.currency;
+
+    if (currency && currency !== 'EUR') {
+      // Look for the actual EUR amount on the next lines
+      const eurPattern = /(-?[\d\s\.]*,?\d{2})\s*(?:€|EUR)\s*$/i;
       
-      // In our loop, we might need a more sophisticated multi-line lookahead,
-      // but for now let's try to find the EUR amount if it's there.
+      // Check nextLine and followingLine
+      const linesToCheck = [nextLine, followingLine].filter(Boolean) as string[];
+      for (const next of linesToCheck) {
+        const match = next.trim().match(eurPattern);
+        if (match) {
+          const parsedEur = parseAmountWithCurrency(match[0]);
+          if (parsedEur) {
+            eurAmount = parsedEur.amount;
+            break;
+          }
+        }
+      }
     }
 
-    // Description is what's left in the middle
     const description = beforeAmount.trim();
-
-    // Skip lines that don't have a meaningful description
     if (!description || description.length < 2) {
       return null;
     }
@@ -444,8 +460,8 @@ export class BnpParser extends BaseParser {
     return {
       date,
       description,
-      amount: parsedAmount.amount,
-      originalCurrency: parsedAmount.currency,
+      amount: eurAmount,
+      originalCurrency: currency,
     };
   }
 

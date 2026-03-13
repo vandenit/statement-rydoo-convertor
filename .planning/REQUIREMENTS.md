@@ -30,17 +30,18 @@
 
 ### CLI Interface
 
-- [ ] **CLI-01**: Read PDFs from input/ folder automatically
-- [ ] **CLI-02**: Move processed PDFs to processed/ folder
-- [ ] **CLI-03**: Write Excel output to output/ folder
-- [ ] **CLI-04**: Support --bank flag (default: bnp)
-- [ ] **CLI-05**: Show progress and summary after processing
+- [x] **CLI-01**: Read PDFs from input/ folder automatically
+- [x] **CLI-02**: Move processed PDFs to processed/ folder
+- [x] **CLI-03**: Write Excel output to output/ folder
+- [x] **CLI-04**: Support --bank flag (default: bnp)
+- [x] **CLI-05**: Show progress and summary after processing
 
-### Architecture
+### Architecture & Distribution
 
-- [ ] **ARCH-01**: TypeScript implementation
-- [ ] **ARCH-02**: Installable via npm
-- [ ] **ARCH-03**: Extensible parser interface (strategy pattern) for future banks
+- [x] **ARCH-01**: TypeScript implementation
+- [x] **ARCH-02**: Installable via npm
+- [x] **ARCH-03**: Extensible parser interface (strategy pattern) for future banks
+- [x] **DIST-01**: Portable Windows executable (.exe) containing Node.js runtime
 
 ## v2 Requirements
 
@@ -54,6 +55,10 @@
 - **ENH-01**: GUI/web interface option
 - **ENH-02**: Direct Rydoo API upload
 - **ENH-03**: Manual transaction editing before export
+### Bugfixes
+
+- [ ] **BUG-01**: Correct negative amount parsing when currency follows
+- [ ] **BUG-02**: Correct date parsing for DD/MM formats to avoid MM/DD swap
 
 ## Out of Scope
 
@@ -107,6 +112,10 @@
 | Phase 3 | EXTRACT-01 to EXTRACT-05  | Data Extraction — structured transaction objects                     |
 | Phase 4 | EXCEL-01 to EXCEL-05      | Excel Generation — Rydoo-compatible .xlsx output                     |
 | Phase 5 | CLI-01 to CLI-05, ARCH-03 | CLI Interface and Integration — folder workflow and strategy pattern |
+| Phase 6 | DIST-01                  | Windows Distribution — portable .exe generation                     |
+| Phase 7 | BUG-01, BUG-02           | Bugfixes — correct amount and date parsing for specific cases       |
+| Phase 8 | BUG-03, FEAT-01, FEAT-02 | 🟢 Completed | Final Polish — multi-file aggregation, sorting, and header fixes    |
+| Phase 9 | DIST-02                  | 🟢 Completed | macOS Distribution — portable macOS executables (x64 & arm64)        |
 
 ---
 

@@ -110,4 +110,6 @@ export interface Transaction {
   amount: number;
   /** Original currency code for foreign transactions (e.g., "USD") */
   originalCurrency?: string;
+  /** Card number associated with this transaction */
+  cardNumber?: string;
 }
