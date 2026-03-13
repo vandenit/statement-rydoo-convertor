@@ -12,6 +12,9 @@ export interface ConversionResult {
   cardNumber: string;
   transactions: Transaction[];
   success: boolean;
+  statementTotal?: number;
+  calculatedTotal?: number;
+  isValidTotal?: boolean;
   error?: string;
 }
 
@@ -33,11 +36,19 @@ export class StatementConverter {
       // For now we only have BnpParser. In the future, we can add detection logic here.
       const result = await bnpParser.parse(pdfContent);
       
+      const calculatedTotal = result.rawTransactions.reduce((sum, t) => sum + t.amount, 0);
+      const isValidTotal = result.statementTotal !== undefined 
+        ? Math.abs(calculatedTotal - result.statementTotal) < 0.01 
+        : true;
+
       return {
         pdfPath,
         transactionCount: result.rawTransactions.length,
         cardNumber: result.cardNumber,
         transactions: result.rawTransactions,
+        statementTotal: result.statementTotal,
+        calculatedTotal,
+        isValidTotal,
         success: true
       };
     } catch (error: any) {

@@ -33,6 +33,8 @@ export interface ParserResult {
   cardNumber: string;
   /** Array of parsed transactions extracted from PDF */
   rawTransactions: Transaction[];
+  /** Total amount as stated in the PDF (for validation) */
+  statementTotal?: number;
   /** Full PDF text for debugging */
   rawText: string;
 }

@@ -118,6 +118,8 @@ export class BnpParser extends BaseParser {
       );
     }
 
+    // Extract statement total
+    const statementTotal = this.extractStatementTotal(text);
     // Extract transaction table text
     const tableText = text.substring(tableBounds.startIndex, tableBounds.endIndex);
 
@@ -134,6 +136,7 @@ export class BnpParser extends BaseParser {
     return {
       cardNumber: cardInfo.lastFour,
       rawTransactions,
+      statementTotal,
       rawText: tableText, // Pass table section to Phase 3 for processing
     };
   }
@@ -201,6 +204,34 @@ export class BnpParser extends BaseParser {
     return null;
   }
 
+  /**
+   * Extract the total statement amount from BNP PDF text
+   *
+   * Pattern: "TOTAL -1.638,25 €" or "TOTAL-4.800,04 €"
+   *
+   * @param text - PDF text content
+   * @returns Total amount as number or undefined
+   */
+  protected extractStatementTotal(text: string): number | undefined {
+    // Looks for "TOTAL" followed by optional space/newline and an amount
+    const totalRegex = /TOTAL\s*(-?[\d\s\.]*,\d{2})\s*€/i;
+    const match = text.match(totalRegex);
+
+    if (match) {
+      const parsed = parseAmountWithCurrency(match[1] + ' €');
+      return parsed?.amount;
+    }
+
+    // Try "NOUVEAU SOLDE" as fallback
+    const fallbackRegex = /NOUVEAU SOLDE\s*(-?[\d\s\.]*,\d{2})\s*€/i;
+    const fallbackMatch = text.match(fallbackRegex);
+    if (fallbackMatch) {
+      const parsed = parseAmountWithCurrency(fallbackMatch[1] + ' €');
+      return parsed?.amount;
+    }
+
+    return undefined;
+  }
   /**
    * Identify transaction table boundaries in BNP PDF text
    *

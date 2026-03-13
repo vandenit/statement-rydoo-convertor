@@ -57,6 +57,16 @@ program
             cardNumbers.add(result.transactions[0].cardNumber);
           }
           
+          if (result.statementTotal !== undefined) {
+            if (result.isValidTotal) {
+              console.log(`✅ ${file}: Validated (Total: ${result.statementTotal.toFixed(2)} €)`);
+            } else {
+              console.warn(`⚠️  ${file}: Total mismatch! Expected: ${result.statementTotal.toFixed(2)} €, Calculated: ${result.calculatedTotal?.toFixed(2)} €`);
+            }
+          } else {
+            console.log(`✅ ${file}: Processed (${result.transactions.length} transactions)`);
+          }
+
           // Move processed file
           fs.renameSync(filePath, path.join(processedPath, file));
         } else {
