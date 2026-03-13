@@ -8,7 +8,6 @@ import { Transaction } from '../types/transaction.js';
 
 export interface ConversionResult {
   pdfPath: string;
-  excelPath: string;
   transactionCount: number;
   cardNumber: string;
   transactions: Transaction[];
@@ -20,9 +19,8 @@ export class StatementConverter {
   /**
    * Parses a single PDF file and returns transactions
    */
-  async convert(pdfPath: string, outputDir: string): Promise<ConversionResult> {
+  async convert(pdfPath: string): Promise<ConversionResult> {
     const filename = path.basename(pdfPath, '.pdf');
-    const excelPath = path.join(outputDir, `${filename}.xlsx`);
     
     try {
       if (!fs.existsSync(pdfPath)) {
@@ -37,7 +35,6 @@ export class StatementConverter {
       
       return {
         pdfPath,
-        excelPath,
         transactionCount: result.rawTransactions.length,
         cardNumber: result.cardNumber,
         transactions: result.rawTransactions,
@@ -46,7 +43,6 @@ export class StatementConverter {
     } catch (error: any) {
       return {
         pdfPath,
-        excelPath,
         transactionCount: 0,
         cardNumber: 'unknown',
         transactions: [],

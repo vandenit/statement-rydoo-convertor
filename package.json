@@ -13,9 +13,11 @@
     "format": "prettier --write src/",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check": "tsc --noEmit && npm run test",
     "bundle": "node scripts/bundle.js",
-    "build:exe": "npm run bundle && npx pkg dist/bundle.cjs --targets node18-win-x64 --output ./dist-exe/statement-convertor.exe",
-    "build:macos": "npm run bundle && npx pkg dist/bundle.cjs --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos",
+    "build:exe": "npm run check && npm run bundle && npx pkg dist/bundle.cjs --targets node18-win-x64 --output ./dist-exe/statement-convertor.exe",
+    "build:macos": "npm run check && npm run bundle && npx pkg dist/bundle.cjs --targets node18-macos-x64,node18-macos-arm64 --out-path ./dist-macos",
+    "test:binary": "npm run bundle && npx pkg dist/bundle.cjs --targets node18-linux-x64 --output ./dist-linux/test-bin && ./dist-linux/test-bin --help",
     "release": "./scripts/release.sh"
   },
   "bin": {

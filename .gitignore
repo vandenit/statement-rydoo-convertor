@@ -5,6 +5,7 @@ node_modules/
 dist/
 dist-exe/
 dist-macos/
+dist-linux/
 
 # Logs
 *.log
