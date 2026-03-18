@@ -6,7 +6,8 @@ After=network.target
 Type=simple
 User=filip
 WorkingDirectory=/home/filip/projects/statement-convertor
-ExecStart=/usr/bin/npm run bot
+Environment=PATH=/home/filip/.nvm/versions/node/v24.12.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/filip/.nvm/versions/node/v24.12.0/bin/npm run bot
 Restart=on-failure
 RestartSec=10
 
