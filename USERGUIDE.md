@@ -30,20 +30,21 @@ Do you want to run the bot on your own server or VPS? Follow these steps:
     npm run bot
     ```
 
-### Running the Bot as a Background Service
-Once you've confirmed the bot successfully processes emails, you can start it as a background daemon. This allows you to safely close your SSH connection or terminal.
+### Running the Bot via Systemd (Recommended)
+To ensure the bot runs professionally in the background and automatically restarts on server reboots or crashes, we use **systemd**:
 
-1.  **Start the bot**:
+1. Ensure the `statement-bot.service` file in the project root is updated with your correct paths and Linux username.
+2. Run the following commands on your server:
     ```bash
-    npm run bot:start
+    sudo cp statement-bot.service /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now statement-bot.service
     ```
-    *The bot now runs safely in the background. Activity logs are saved in `bot.log`.*
 
-2.  **Stop the bot**:
-    ```bash
-    npm run bot:stop
-    ```
-    *This command reads the saved `bot.pid` file to gracefully shut down the background service.*
+The service is now fully managed in the background.
+*   **View live logs**: `sudo journalctl -u statement-bot -f`
+*   **Start bot**: `sudo systemctl start statement-bot`
+*   **Stop bot**: `sudo systemctl stop statement-bot`
 
 ---
 
