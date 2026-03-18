@@ -1,56 +1,56 @@
-# Gebruikershandleiding: Statement Convertor (E-mail Bot)
+# User Guide: Statement Convertor (Email Bot)
 
-Welkom bij de **Statement Convertor**. Deze tool is ontworpen om PDF-uittreksels van BNP Paribas Fortis snel en foutloos om te zetten naar een Excel-bestand dat direct geïmporteerd kan worden in Rydoo.
+Welcome to the **Statement Convertor**. This tool is designed to quickly and flawlessly convert BNP Paribas Fortis PDF bank statements into an Excel file that can be immediately imported into Rydoo.
 
-Deze tool draait als een geautomatiseerde **e-mail bot**, waardoor je zelf absoluut geen software of `.exe` bestanden hoeft te installeren op je (beveiligde) werk-laptop.
-
----
-
-## 🚀 1. Hoe gebruik ik de E-mail Bot?
-
-Stuur simpelweg een e-mail met één of meerdere PDF-uittreksels (of een `.zip` bestand met PDF's) naar het ingestelde e-mailadres (bijv. `statements@vandenit.be`).
-
-1. De bot controleert de mailbox elke minuut.
-2. Nieuwe PDF's worden razendsnel lokaal gedownload en omgezet.
-3. De originele inkomende mail wordt netjes verplaatst naar de map `statements_processed` op de e-mailserver om dubbel werk te voorkomen.
-4. Je ontvangt vrijwel direct een antwoord e-mail (via Postmark) met daarin een handige samenvatting (totalen per document) én het verwerkte Rydoo Excel-bestand als bijlage!
+This tool runs as an automated **Email Bot**, completely eliminating the need to install any software or `.exe` files on your (secured) corporate laptop.
 
 ---
 
-## 🛠️ 2. Zelf de Bot hosten (Voor Beheerders)
+## 🚀 1. How to use the Email Bot?
 
-Wil je de bot zelf draaien op een server of VPS? Volg deze stappen:
+Simply send an email containing one or more PDF statements (or a `.zip` archive containing PDFs) to the configured email address (e.g., `statements@vandenit.be`).
 
-### Installatie / Configuratie
-1. Kloon deze repository en draai `npm install`.
-2. Vul je IMAP- en bestemmingsgegevens in het `config.yaml` bestand in.
-3. Zet je wachtwoorden en API-sleutels (zoals `POSTMARK_API_KEY` en `EMAIL_PASSWORD`) in een lokale `.env` file (gebruik de `.env.example` of documentatie in de repo als leidraad).
-4. Test of de connecties werken door de bot eenmalig te starten via:
+1. The bot monitors the mailbox every minute.
+2. New PDFs are instantly downloaded and converted locally by the server.
+3. The original incoming email is moved to a `statements_processed` folder on the mail server to prevent duplicate processing.
+4. You will almost immediately receive an automated reply via email (powered by Postmark) containing a detailed summary (totals per document) along with your processed Rydoo Excel file attached!
+
+---
+
+## 🛠️ 2. Hosting the Bot (For Administrators)
+
+Do you want to run the bot on your own server or VPS? Follow these steps:
+
+### Installation & Configuration
+1. Clone this repository and run `npm install`.
+2. Enter your IMAP and destination details in the `config.yaml` file.
+3. Place your sensitive passwords and API keys (such as `POSTMARK_API_KEY` and `EMAIL_PASSWORD`) in a local `.env` file (use `.env.example` or the repository documentation as a guide).
+4. Verify the connections by starting the bot once manually:
     ```bash
     npm run bot
     ```
 
-### De bot permanent (als service) draaien
-Zodra je zeker weet dat de bot succesvol mails oppakt, kun je hem als background-daemon starten. Zo kun je je SSH-connectie of terminal sluiten.
+### Running the Bot as a Background Service
+Once you've confirmed the bot successfully processes emails, you can start it as a background daemon. This allows you to safely close your SSH connection or terminal.
 
-1.  **Start de bot**:
+1.  **Start the bot**:
     ```bash
     npm run bot:start
     ```
-    *De bot draait nu veilig op de achtergrond. De logs worden opgeslagen in `bot.log`.*
+    *The bot now runs safely in the background. Activity logs are saved in `bot.log`.*
 
-2.  **Stop de bot**:
+2.  **Stop the bot**:
     ```bash
     npm run bot:stop
     ```
-    *Dit commando leest het opgeslagen `bot.pid` bestand en sluit de background service netjes (gracefully) af.*
+    *This command reads the saved `bot.pid` file to gracefully shut down the background service.*
 
 ---
 
-## ✅ 3. Validatie per bestand
+## ✅ 3. Per-File Validation
 
-De tool controleert voor de zekerheid het totaalbedrag. Per verwerkte PDF toont de e-mail of de transacties wiskundig kloppen met het PDF "Totaalsaldo". Als er mismatches zijn, controleer het Excel-bestand dan handmatig op eventuele leesfouten.
+For complete peace of mind, the tool verifies all calculations. The return email displays whether the mathematical sum of all extracted transactions perfectly matches the "Total Balance" listed on that specific PDF. If any discrepancies (mismatches) are found, please review the generated Excel file manually for potential reading errors.
 
 ---
 
-*Veel succes met het automatiseren van je onkostenverwerking!*
+*Good luck automating your expense processing!*
