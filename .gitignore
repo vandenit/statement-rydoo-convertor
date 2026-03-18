@@ -9,6 +9,7 @@ dist-linux/
 
 # Logs
 *.log
+bot.pid
 
 # Environment
 .env

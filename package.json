@@ -8,6 +8,8 @@
     "build": "tsc",
     "dev": "node --loader ts-node/esm src/cli.ts",
     "bot": "node --loader ts-node/esm src/bot.ts",
+    "bot:start": "nohup node --loader ts-node/esm src/bot.ts > bot.log 2>&1 &",
+    "bot:stop": "kill $(cat bot.pid) && rm bot.pid",
     "start": "node dist/cli.js",
     "clean": "rm -rf dist",
     "lint": "eslint src/",

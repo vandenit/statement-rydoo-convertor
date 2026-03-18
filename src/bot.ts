@@ -121,11 +121,42 @@ export async function checkEmails() {
 }
 
 // Start bot
-const INTERVAL_MS = parseInt(process.env.BOT_INTERVAL_MS || '60000', 10); // Default 1 minute
+const INTERVAL_MS = parseInt(process.env.BOT_INTERVAL_MS || '30000', 10); // Default 30s for testing
+const PID_FILE = path.join(process.cwd(), 'bot.pid');
 
-console.log(`[Bot] Starting Email Bot. Checking every ${INTERVAL_MS / 1000} seconds...`);
-console.log(`[Bot] To stop, press CTRL+C`);
+async function startBot() {
+    // Write PID file
+    fs.writeFileSync(PID_FILE, process.pid.toString());
+    console.log(`[Bot] Started with PID ${process.pid}`);
+    console.log(`[Bot] Checking every ${INTERVAL_MS / 1000} seconds...`);
+    console.log(`[Bot] PID file: ${PID_FILE}`);
+    console.log(`[Bot] Stop with: npm run bot:stop`);
+    
+    // Run once immediately
+    await checkEmails().catch(e => console.error('[Bot] Startup error:', e));
+    
+    // Then run on interval
+    setInterval(async () => {
+        try {
+            await checkEmails();
+        } catch (e: any) {
+            console.error('[Bot] Interval Error:', e.message);
+        }
+    }, INTERVAL_MS);
+}
 
-// Run once immediately, then on interval
-checkEmails().catch(console.error);
-setInterval(() => checkEmails().catch(console.error), INTERVAL_MS);
+// Handle graceful shutdown
+function shutdown(signal: string) {
+    console.log(`[Bot] Received ${signal}, shutting down...`);
+    if (fs.existsSync(PID_FILE)) fs.unlinkSync(PID_FILE);
+    process.exit(0);
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+startBot().catch(e => {
+    console.error('[Bot] Fatal error:', e.message);
+    if (fs.existsSync(PID_FILE)) fs.unlinkSync(PID_FILE);
+    process.exit(1);
+});

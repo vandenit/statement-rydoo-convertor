@@ -84,7 +84,25 @@ Voor gebruikers die geen lokale `.exe` bestanden kunnen of mogen draaien (vanweg
 ### Installatie / Configuratie
 *   Vul de IMAP-gegevens in het `config.yaml` bestand in.
 *   Zet je wachttwoorden en API-sleutels (zoals `POSTMARK_API_KEY` en `EMAIL_PASSWORD`) in een `.env` bestand (deze wordt veilig lokaal gehouden).
-*   Start de bot via de terminal: `npm run bot`
+*   Test of alles werkt door de bot eenmalig te starten via:
+    ```bash
+    npm run bot
+    ```
+
+### De bot permanent op de achtergrond draaien
+Om de bot als een veilige achtergrond-service (daemon) te laten draaien, zodat je je terminal kunt sluiten zonder dat de bot stopt:
+
+1.  **Start de bot**:
+    ```bash
+    npm run bot:start
+    ```
+    *De bot draait nu veilig op de achtergrond. De logs worden opgeslagen in `bot.log`.*
+
+2.  **Stop de bot**:
+    ```bash
+    npm run bot:stop
+    ```
+    *Dit commando leest de opgeslagen `bot.pid` en sluit de achtergrond-service netjes af.*
 
 ---
 
