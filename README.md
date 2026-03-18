@@ -1,72 +1,38 @@
-# Statement Convertor
+# Statement Convertor Bot
 
-A portable command-line tool to convert bank statement PDFs (specifically BNP Paribas Fortis credit card statements) into Rydoo-compatible Excel files.
+A Node.js Email Bot that automatically extracts transactions from structural PDF bank statements (currently supporting BNP Paribas Fortis and bpost bank) and converts them into an Excel format ready for immediate import into Rydoo.
 
-## Features
-- **Multi-file Aggregation**: Automatically combines all PDFs in the `input/` folder into a single Excel file.
-- **Rydoo Compatible**: Generates the exact two-row header and column mapping required for Rydoo personal transaction imports.
-- **Smart Parsing**: Handles foreign currencies, multiline descriptions, and European number formats (e.g., `1.045,00`).
-- **Portable**: Run directly on Windows or macOS without installing Node.js or any dependencies.
+## 🚀 The Email Bot Service
+Instead of running local desktop software, this project serves as a standalone **Background Bot** that monitors a designated inbox. No local installation on employee laptops is required.
 
-## Directory Structure
-- `input/`: Place your bank statement PDFs here.
-- `output/`: The generated Excel file (`statements-YYYY-MM-DD.xlsx`) will appear here.
-- `processed/`: PDFs are moved here after successful conversion.
+### Features
+*   **Automatic IMAP Fetching**: Polls an inbox every minute for emails containing `.pdf` or `.zip` files.
+*   **Intelligent Extraction**: Safely unzips archives and parses the PDF text.
+*   **Mathematical Verification**: Validates the extracted transaction totals against the "Total Balance" listed on the statement.
+*   **Smart Moving**: Automatically moves processed emails from the inbox to a `statements_processed` folder on the mail server.
+*   **Postmark SMTP Delivery**: Automatically generates the final Excel file and emails it directly back to the sender via Postmark using a Handlebars HTML template summary.
 
----
+## 🛠️ Installation (Server Admin)
 
-## Usage (for Users/Clients)
+1.  Clone this repository.
+2.  Install dependencies: `npm install`
+3.  Configure your IMAP inbox structure in `config.yaml`.
+4.  Configure your sensitive credentials in `.env` (e.g., `EMAIL_PASSWORD`, `POSTMARK_API_KEY`).
+5.  Start the bot as a background daemon:
+    ```bash
+    npm run bot:start
+    ```
+6.  To gracefully stop the bot:
+    ```bash
+    npm run bot:stop
+    ```
 
-### Recommended: GitHub Releases
-The easiest way to get the latest version is to download the portable binaries from the **[Releases](https://github.com/vandenit/statement-convertor/releases)** page on GitHub.
-- `statement-convertor-win.exe` (Windows)
-- `statement-convertor-macos-x64` (Mac Intel)
-- `statement-convertor-macos-arm64` (Mac M1/M2/M3)
+## 👥 Usage (End Users)
+End users simply send an email containing their PDF statement(s) to the bot's configured email address. Within a minute, they will receive an automated reply with the converted Excel file attached. See `USERGUIDE.md` for more details.
 
-### Operating System Notes
-- **Windows**: Just run the `.exe`. 
-- **macOS**: Since the app is not signed, you might need to **Right-click -> Open** on the first launch, or run `codesign --sign - <path_to_binary>` in the terminal to authorize it.
-
----
-
-## Technical Documentation (for Developers)
-
-### Prerequisites
-- Node.js (v18 or higher)
-- npm
-
-### Installation
-```bash
-npm install
-```
-
-### Development
-```bash
-# Run the tool in watch mode (requires PDFs in input/)
-npm run dev
-```
-
-### Build Processes
-```bash
-# Compile TypeScript to JavaScript
-npm run build
-
-# Generate Windows portable executable
-npm run build:exe
-
-# Generate macOS portable binaries (Intel & Apple Silicon)
-npm run build:macos
-```
-
-### Automation & Deployment
-- **Automated Release (Recommended)**:
-  Run the provided release script to bump the version, tag, and push to GitHub:
-  ```bash
-  npm run release        # Defaults to minor update (0.1.0 -> 0.2.0)
-  npm run release patch  # For patch update (0.1.0 -> 0.1.1)
-  ```
-  GitHub Actions will then automatically build and create a GitHub Release.
-
-- **Manual Delivery**: 
-  1. Run `npm run build:exe` and `npm run build:macos`.
-  2. Send the binaries from `dist-exe/` and `dist-macos/` to the client.
+## 🛠 Technology Stack
+*   **Node.js** & **TypeScript**
+*   **imap-simple** for polling
+*   **postmark** for structured email delivery
+*   **exceljs** for `.xlsx` generation
+*   **pdf-parse** (bundled) for parsing PDFs

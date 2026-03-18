@@ -1,96 +1,37 @@
-# Gebruikershandleiding: Statement Convertor
+# Gebruikershandleiding: Statement Convertor (E-mail Bot)
 
 Welkom bij de **Statement Convertor**. Deze tool is ontworpen om PDF-uittreksels van BNP Paribas Fortis snel en foutloos om te zetten naar een Excel-bestand dat direct geïmporteerd kan worden in Rydoo.
 
----
-
-## 🚀 1. Waar vind ik de tool?
-
-De laatste versie van de tool is altijd te vinden op de **GitHub Release pagina**:
-
-👉 [Download de laatste versie (v0.9.1)](https://github.com/vandenit/statement-convertor/releases/latest)
-
-Scroll naar beneden naar **Assets** en download het bestand voor jouw systeem:
-*   **Windows**: `statement-convertor-win.exe`
-*   **macOS**: `statement-convertor-macos` (voor Intel & M1/M2/M3 Macs)
+Deze tool draait als een geautomatiseerde **e-mail bot**, waardoor je zelf absoluut geen software of `.exe` bestanden hoeft te installeren op je (beveiligde) werk-laptop.
 
 ---
 
-## 🛠️ 2. Installatie & Opstarten
+## 🚀 1. Hoe gebruik ik de E-mail Bot?
 
-### Voor Windows
-1.  Download de `.exe` file.
-2.  Plaats de file in een eigen map (bijv. op je Bureaublad of in Documenten).
-3.  **Belangrijk**: Bij de eerste keer uitvoeren kan Windows een melding geven ("Microsoft Defender SmartScreen"). Klik op **"Meer informatie"** en daarna op **"Toch uitvoeren"**.
+Stuur simpelweg een e-mail met één of meerdere PDF-uittreksels (of een `.zip` bestand met PDF's) naar het ingestelde e-mailadres (bijv. `statements@vandenit.be`).
 
-### Voor macOS
-1.  Download de macOS binary.
-2.  Open je **Terminal** (via Spotlight/Command+Space).
-3.  Maak het bestand uitvoerbaar met dit commando:
-    ```bash
-    chmod +x ~/Downloads/statement-convertor-macos
-    ```
-4.  Sleep het bestand naar een map naar keuze en start het via de Terminal.
+1. De bot controleert de mailbox elke minuut.
+2. Nieuwe PDF's worden razendsnel lokaal gedownload en omgezet.
+3. De originele inkomende mail wordt netjes verplaatst naar de map `statements_processed` op de e-mailserver om dubbel werk te voorkomen.
+4. Je ontvangt vrijwel direct een antwoord e-mail (via Postmark) met daarin een handige samenvatting (totalen per document) én het verwerkte Rydoo Excel-bestand als bijlage!
 
 ---
 
-## 📁 3. Hoe werkt de mappenstructuur?
+## 🛠️ 2. Zelf de Bot hosten (Voor Beheerders)
 
-Zodra je de tool voor de eerste keer start, maakt hij automatisch drie mappen aan in dezelfde map als waar de tool staat:
-
-1.  **`input/`**: Plaats hier de PDF-uittreksels die je wilt omzetten. Je kunt meerdere bestanden tegelijk toevoegen.
-2.  **`output/`**: Hier verschijnt het gegenereerde Excel-bestand (`statements-YYYY-MM-DD.xlsx`).
-3.  **`processed/`**: Zodra een PDF succesvol is verwerkt, verplaatst de tool het bestand van `input` naar deze map. Zo voorkom je dat je bestanden dubbel verwerkt.
-
----
-
-## ✅ 4. Automatische Verificatie
-
-De tool bevat een ingebouwd controlesysteem voor je gemoedsrust. Tijdens het verwerken zie je verschillende statussen in het scherm:
-
-*   **✅ Validated**: De tool heeft het "TOTAL" bedrag in de PDF gevonden en bevestigd dat dit exact overeenkomt met de som van alle gevonden transacties.
-*   **✅ Processed**: Het bestand is verwerkt. (Wordt getoond als er geen totaalbedrag in de PDF stond om mee te vergelijken).
-*   **⚠️ Total mismatch**: De tool heeft een verschil gevonden tussen het totaal in de PDF en de lijst met transacties. Controleer in dit geval het Excel-bestand handmatig.
-*   **❌ Failed**: Er is iets misgegaan (bijv. een beschadigde PDF). De reden wordt erbij vermeld.
-
-Aan het einde zie je een **Summary** met het totale aantal transacties en het **Grand Total** (het totale bedrag over alle bestanden heen).
-
----
-
-## ❓ 5. Veelgestelde Vragen (FAQ)
-
-**Mijn bestanden blijven in de `input` map staan?**
-Als een bestand niet verwerkt kan worden (status `❌ Failed`), blijft het in de `input` map staan. Controleer de foutmelding in het scherm.
-
-**Werkt dit ook voor andere banken?**
-Momenteel is de tool geoptimaliseerd voor BNP Paribas Fortis en bpost bank credit card statements.
-
-**Waarom zie ik "ExperimentalWarning" in mijn scherm?**
-Dit is een melding van de techniek achter de tool (Node.js) en heeft geen invloed op de werking. Je kunt dit negeren.
-
----
-
-## 🤖 6. De E-mail Bot (Automatisch Verwerken)
-
-Voor gebruikers die geen lokale `.exe` bestanden kunnen of mogen draaien (vanwege strenge bedrijfsbeveiliging), bevat de tool nu een automatische e-mail bot.
-
-### Hoe werkt het?
-1. Je stuurt een e-mail met één of meerdere PDF-uittreksels (of een `.zip` bestand met PDF's) naar het ingestelde e-mailadres (bijv. `statements@vandenit.be`).
-2. De bot controleert de mailbox elke minuut.
-3. Nieuwe PDF's worden razendsnel lokaal verwerkt.
-4. De originele mail wordt in Fastmail netjes verplaatst naar de map `statements_processed`.
-5. Je ontvangt vrijwel direct een e-mail retour (via Postmark) met daarin een handige samenvatting (per document) én het verwerkte Rydoo Excel-bestand als bijlage!
+Wil je de bot zelf draaien op een server of VPS? Volg deze stappen:
 
 ### Installatie / Configuratie
-*   Vul de IMAP-gegevens in het `config.yaml` bestand in.
-*   Zet je wachttwoorden en API-sleutels (zoals `POSTMARK_API_KEY` en `EMAIL_PASSWORD`) in een `.env` bestand (deze wordt veilig lokaal gehouden).
-*   Test of alles werkt door de bot eenmalig te starten via:
+1. Kloon deze repository en draai `npm install`.
+2. Vul je IMAP- en bestemmingsgegevens in het `config.yaml` bestand in.
+3. Zet je wachtwoorden en API-sleutels (zoals `POSTMARK_API_KEY` en `EMAIL_PASSWORD`) in een lokale `.env` file (gebruik de `.env.example` of documentatie in de repo als leidraad).
+4. Test of de connecties werken door de bot eenmalig te starten via:
     ```bash
     npm run bot
     ```
 
-### De bot permanent op de achtergrond draaien
-Om de bot als een veilige achtergrond-service (daemon) te laten draaien, zodat je je terminal kunt sluiten zonder dat de bot stopt:
+### De bot permanent (als service) draaien
+Zodra je zeker weet dat de bot succesvol mails oppakt, kun je hem als background-daemon starten. Zo kun je je SSH-connectie of terminal sluiten.
 
 1.  **Start de bot**:
     ```bash
@@ -102,8 +43,14 @@ Om de bot als een veilige achtergrond-service (daemon) te laten draaien, zodat j
     ```bash
     npm run bot:stop
     ```
-    *Dit commando leest de opgeslagen `bot.pid` en sluit de achtergrond-service netjes af.*
+    *Dit commando leest het opgeslagen `bot.pid` bestand en sluit de background service netjes (gracefully) af.*
 
 ---
 
-*Veel succes met het versnellen van je onkostenverwerking!*
+## ✅ 3. Validatie per bestand
+
+De tool controleert voor de zekerheid het totaalbedrag. Per verwerkte PDF toont de e-mail of de transacties wiskundig kloppen met het PDF "Totaalsaldo". Als er mismatches zijn, controleer het Excel-bestand dan handmatig op eventuele leesfouten.
+
+---
+
+*Veel succes met het automatiseren van je onkostenverwerking!*
