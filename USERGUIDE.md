@@ -70,4 +70,22 @@ Dit is een melding van de techniek achter de tool (Node.js) en heeft geen invloe
 
 ---
 
+## 🤖 6. De E-mail Bot (Automatisch Verwerken)
+
+Voor gebruikers die geen lokale `.exe` bestanden kunnen of mogen draaien (vanwege strenge bedrijfsbeveiliging), bevat de tool nu een automatische e-mail bot.
+
+### Hoe werkt het?
+1. Je stuurt een e-mail met één of meerdere PDF-uittreksels (of een `.zip` bestand met PDF's) naar het ingestelde e-mailadres (bijv. `statements@vandenit.be`).
+2. De bot controleert de mailbox elke minuut.
+3. Nieuwe PDF's worden razendsnel lokaal verwerkt.
+4. De originele mail wordt in Fastmail netjes verplaatst naar de map `statements_processed`.
+5. Je ontvangt vrijwel direct een e-mail retour (via Postmark) met daarin een handige samenvatting (per document) én het verwerkte Rydoo Excel-bestand als bijlage!
+
+### Installatie / Configuratie
+*   Vul de IMAP-gegevens in het `config.yaml` bestand in.
+*   Zet je wachttwoorden en API-sleutels (zoals `POSTMARK_API_KEY` en `EMAIL_PASSWORD`) in een `.env` bestand (deze wordt veilig lokaal gehouden).
+*   Start de bot via de terminal: `npm run bot`
+
+---
+
 *Veel succes met het versnellen van je onkostenverwerking!*

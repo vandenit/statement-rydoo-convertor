@@ -7,12 +7,13 @@
   "scripts": {
     "build": "tsc",
     "dev": "node --loader ts-node/esm src/cli.ts",
+    "bot": "node --loader ts-node/esm src/bot.ts",
     "start": "node dist/cli.js",
     "clean": "rm -rf dist",
     "lint": "eslint src/",
     "format": "prettier --write src/",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "test": "vitest run src/",
+    "test:watch": "vitest src/",
     "check": "tsc --noEmit && npm run test",
     "bundle": "node scripts/bundle.js",
     "build:exe": "npm run check && npm run bundle && npx pkg . --targets node18-win-x64 --output ./dist-exe/statement-convertor.exe",
@@ -40,6 +41,9 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/imap-simple": "^4.2.10",
+    "@types/mailparser": "^3.4.6",
     "@types/node": "^25.4.0",
     "@types/pdf-parse": "^1.1.5",
     "@typescript-eslint/eslint-plugin": "^8.57.0",
@@ -54,8 +58,14 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "commander": "^14.0.3",
+    "dotenv": "^17.3.1",
+    "imap-simple": "^5.1.0",
+    "mailparser": "^3.9.4",
     "pdf-parse": "^1.1.1",
-    "xlsx": "^0.18.5"
+    "postmark": "^4.0.7",
+    "xlsx": "^0.18.5",
+    "yaml": "^2.8.2"
   }
 }

@@ -1,0 +1,12 @@
+# General Configuration
+# Email Configuration (Fastmail)
+email:
+  user: "filip@vandenit.be"
+  # password: "..." # Use App Password! Or set EMAIL_PASSWORD env var
+  host: "imap.fastmail.com"
+  port: 993
+  mailbox: "statements"
+  processedMailbox: "statements_processed"
+  targetEmail: "statements@vandenit.be"
+postmark:
+  template: "statements-available"
