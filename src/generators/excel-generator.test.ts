@@ -117,7 +117,8 @@ describe('generateExcel', () => {
     const data = XLSX.utils.sheet_to_json(sheet, { range: 1, raw: false })[0] as Record<string, unknown>;
 
     expect(data.CurrencyCode).toBe('USD');
-    expect(data.AccountAmount).toBe('-45');
+    expect(data.AccountAmount).toBe('45');
+    expect(data.Amount).toBe('45');
   });
 
   it('should handle multiple transactions', () => {

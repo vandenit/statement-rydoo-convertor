@@ -53,12 +53,12 @@ export function generateExcel(
   // Build row data
   const dataRows = transactions.map((t) => [
     t.date,
-    t.amount,
+    Math.abs(t.originalAmount ?? t.amount), // Force positive for Rydoo
     t.description,
     t.originalCurrency || 'EUR',
     t.cardNumber || cardNumberFallback,
     'EUR',
-    t.amount,
+    Math.abs(t.amount || 0), // Force positive for Rydoo
   ]);
 
   // Combine headers and data

@@ -1,0 +1,20 @@
+[Unit]
+Description=Statement Convertor Email Bot
+After=network.target
+
+[Service]
+Type=simple
+User=filip
+WorkingDirectory=/home/filip/projects/statement-convertor
+Environment=PATH=/home/filip/.nvm/versions/node/v24.12.0/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/home/filip/.nvm/versions/node/v24.12.0/bin/npm run bot
+Restart=on-failure
+RestartSec=10
+
+# Beperk log files als het te veel ruimte inneemt
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=statement-bot
+
+[Install]
+WantedBy=multi-user.target

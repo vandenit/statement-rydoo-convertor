@@ -61,6 +61,11 @@ export class BnpParser extends BaseParser {
     'Résultat du compte',
   ];
 
+  // Specific markers for statement overview
+  private static readonly PREVIOUS_BALANCE_PATTERN = /Solde pr[ée]c[ée]dent du \d{2}\/\d{2}\/\d{4}\s+(-?[\d\s\.]*,\d{2})\s*€/i;
+  private static readonly DOMICILIATION_PATTERN = /Domiciliation\s+via\s+votre\s+banque\s+([\+\-]?[\d\s\.]*,\d{2})\s*€/i;
+  private static readonly SUB_TOTAL_PATTERN = /Sous-total\s+.*?\s+([\+\-]?[\d\s\.]*,\d{2})\s*€/i;
+
   // Date patterns for transactions
   private static readonly FULL_DATE_PATTERN = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
   private static readonly SHORT_DATE_PATTERN = /^(\d{2})\/(\d{2})(?:\s+(\d{2})\/(\d{2}))?/;
@@ -120,11 +125,24 @@ export class BnpParser extends BaseParser {
 
     // Extract statement total
     const statementTotal = this.extractStatementTotal(text);
-    // Extract transaction table text
-    const tableText = text.substring(tableBounds.startIndex, tableBounds.endIndex);
+    
+    const cleanText = text.replace(/\n/g, ' ');
+    
+    // Extract overview values for validation
+    const previousBalanceMatch = cleanText.match(BnpParser.PREVIOUS_BALANCE_PATTERN);
+    const previousBalance = previousBalanceMatch ? parseAmountWithCurrency(previousBalanceMatch[1])?.amount : undefined;
+    
+    const domiciliationMatch = cleanText.match(BnpParser.DOMICILIATION_PATTERN);
+    const domiciliation = domiciliationMatch ? parseAmountWithCurrency(domiciliationMatch[1])?.amount : undefined;
 
-    // Extract transactions (Phase 2: returns empty array)
-    // Phase 3 will implement full transaction parsing
+    const cardTotalMatch = cleanText.match(BnpParser.SUB_TOTAL_PATTERN);
+    const cardTotal = cardTotalMatch ? parseAmountWithCurrency(cardTotalMatch[1])?.amount : undefined;
+
+    // Extract transaction table text
+    // BNP specific: Table can be split across pages. Pass the whole text but let the extractor handle markers.
+    const tableText = text.substring(tableBounds.startIndex);
+
+    // Extract transactions
     const transactions = this.extractTransactions(tableText);
 
     // Attach card number to each transaction for multi-file aggregation
@@ -137,6 +155,9 @@ export class BnpParser extends BaseParser {
       cardNumber: cardInfo.lastFour,
       rawTransactions,
       statementTotal,
+      cardTotal,
+      previousBalance,
+      domiciliation,
       rawText: tableText, // Pass table section to Phase 3 for processing
     };
   }
@@ -213,20 +234,25 @@ export class BnpParser extends BaseParser {
    * @returns Total amount as number or undefined
    */
   protected extractStatementTotal(text: string): number | undefined {
+    // Clean up text to remove newlines that might split TOTAL and amount
+    const cleanText = text.replace(/\n/g, ' ');
+    
     // Looks for "TOTAL" followed by optional space/newline and an amount
-    const totalRegex = /TOTAL\s*(-?[\d\s\.]*,\d{2})\s*€/i;
-    const match = text.match(totalRegex);
+    const totalRegex = /TOTAL\s*(-?[\d\s\.]*,\d{2})\s*€|TOTAL\s*€\s*(-?[\d\s\.]*,\d{2})/i;
+    const match = cleanText.match(totalRegex);
 
     if (match) {
-      const parsed = parseAmountWithCurrency(match[1] + ' €');
+      const amountStr = match[1] || match[2];
+      const parsed = parseAmountWithCurrency(amountStr + ' €');
       return parsed?.amount;
     }
 
-    // Try "NOUVEAU SOLDE" as fallback
-    const fallbackRegex = /NOUVEAU SOLDE\s*(-?[\d\s\.]*,\d{2})\s*€/i;
-    const fallbackMatch = text.match(fallbackRegex);
+    // Try "NOUVEAU SOLDE" or other variants as fallback
+    const fallbackRegex = /NOUVEAU SOLDE\s*(-?[\d\s\.]*,\d{2})\s*€|TOTAL\s+(-?[\d\s\.]*,\d{2})\s*€|TOTAL\s*€\s*(-?[\d\s\.]*,\d{2})/i;
+    const fallbackMatch = cleanText.match(fallbackRegex);
     if (fallbackMatch) {
-      const parsed = parseAmountWithCurrency(fallbackMatch[1] + ' €');
+      const amountStr = fallbackMatch[1] || fallbackMatch[2] || fallbackMatch[3];
+      const parsed = parseAmountWithCurrency(amountStr + ' €');
       return parsed?.amount;
     }
 
@@ -328,7 +354,9 @@ export class BnpParser extends BaseParser {
 
       // Skip footer lines
       if (this.isFooterLine(line)) {
-        break;
+        // Skip current line but continue searching (BNP tables split across pages)
+        i++;
+        continue;
       }
 
       // Skip exchange rate lines (handled by lookahead)
@@ -337,15 +365,16 @@ export class BnpParser extends BaseParser {
         continue;
       }
 
-      // Try to parse this as a transaction line
-      // Pass potential next lines for lookahead
-      const parseResult = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
+    // Try to parse this as a transaction line
+    // Pass potential next lines for lookahead
+    const parseResult = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
 
-      if (parseResult) {
-        transactions.push(parseResult.transaction);
-        i += parseResult.linesConsumed;
-        continue;
-      }
+    if (parseResult) {
+      const transaction = parseResult.transaction;
+      transactions.push(transaction);
+      i += parseResult.linesConsumed;
+      continue;
+    }
 
       i++;
     }
@@ -421,13 +450,20 @@ export class BnpParser extends BaseParser {
       afterDate = cleaned.slice(fullDateMatch[0].length).trim();
       date = parseFrenchDate(dateStr);
     } else {
-      // 2. Try to extract short date (e.g., "04/02 05/02")
+    // 2. Try to extract short date (e.g., "04/02 05/02")
       const shortDateMatch = cleaned.match(BnpParser.SHORT_DATE_PATTERN);
 
       if (shortDateMatch) {
       const day = parseInt(shortDateMatch[1], 10);
         const month = parseInt(shortDateMatch[2], 10);
         let year = 2026; // Default to 2026 for this specific PDF set
+        
+        // Handle year wrap-around for statements spanning December/January
+        // If current month is e.g. June (5) and we see a transaction in Dec (11), it's 2025
+        if (month > new Date().getMonth() + 1 + 2) {
+           year = 2025;
+        }
+
         date = new Date(year, month - 1, day);
         afterDate = cleaned.slice(shortDateMatch[0].length).trim();
       }
@@ -466,7 +502,8 @@ export class BnpParser extends BaseParser {
       return null;
     }
 
-    let eurAmount = parsedAmount.amount;
+    let billAmount = parsedAmount.amount; // Default to the first amount found
+    let originalAmount = parsedAmount.amount;
     let currency = parsedAmount.currency;
 
     // Handle foreign currency (multi-line)
@@ -478,7 +515,8 @@ export class BnpParser extends BaseParser {
         : [followingLine];
       
       const filteredLines = linesToCheck.filter(Boolean) as string[];
-      for (const next of filteredLines) {
+      for (let j = 0; j < filteredLines.length; j++) {
+        const next = filteredLines[j];
         const trimmedNext = next.trim();
         // If the next line looks like a new transaction (starts with a date), stop looking
         if (trimmedNext.match(BnpParser.FULL_DATE_PATTERN) || trimmedNext.match(BnpParser.SHORT_DATE_PATTERN)) {
@@ -486,20 +524,34 @@ export class BnpParser extends BaseParser {
         }
 
         const match = trimmedNext.match(BnpParser.EUR_PATTERN);
-      if (match) {
+        if (match) {
           const parsedEur = parseAmountWithCurrency(match[0]);
           if (parsedEur) {
-            eurAmount = parsedEur.amount;
+            billAmount = parsedEur.amount;
             // We consume one more line if we found the EUR amount on a fresh line
             if (next === nextLine) linesConsumed = Math.max(linesConsumed, 2);
-            if (next === followingLine) linesConsumed = 3;
+            if (next === followingLine) linesConsumed = Math.max(linesConsumed, 3);
             break;
           }
         }
+        
         // Also skip exchange rate line if it exists
         if (isExchangeRateLine(next)) {
            if (next === nextLine) linesConsumed = Math.max(linesConsumed, 2);
-           if (next === followingLine) linesConsumed = 3;
+           if (next === followingLine) linesConsumed = Math.max(linesConsumed, 3);
+           
+           // If the exchange rate line was nextLine, the EUR amount might be on followingLine
+           if (next === nextLine && followingLine) {
+             const matchFollowing = followingLine.trim().match(BnpParser.EUR_PATTERN);
+             if (matchFollowing) {
+               const parsedEur = parseAmountWithCurrency(matchFollowing[0]);
+               if (parsedEur) {
+                 billAmount = parsedEur.amount;
+                 linesConsumed = 3;
+                 break;
+               }
+             }
+           }
         }
       }
     }
@@ -512,7 +564,8 @@ export class BnpParser extends BaseParser {
       transaction: {
         date,
         description,
-        amount: eurAmount,
+        amount: billAmount,
+        originalAmount: (currency && currency !== 'EUR') ? originalAmount : undefined,
         originalCurrency: currency,
       },
       linesConsumed

@@ -137,7 +137,7 @@ SOLDE ACTUEL
       expect(result.rawTransactions[1]).toMatchObject({
         date: new Date(2024, 2, 15),
         description: 'FOREIGN STORE',
-        amount: -45.0,
+        originalAmount: -45.0,
         originalCurrency: 'USD',
       });
     });
@@ -168,7 +168,7 @@ SOLDE ACTUEL
       // Foreign transaction should still have currency
       expect(result.rawTransactions[0]).toMatchObject({
         description: 'FOREIGN STORE',
-        amount: -45.0,
+        originalAmount: -45.0,
         originalCurrency: 'USD',
       });
 
@@ -404,7 +404,7 @@ Prochain relevé
     // Check foreign currency transaction
     const foreignTx = result.rawTransactions.find((tx) => tx.description.includes('HOTEL'));
     expect(foreignTx).toBeDefined();
-    expect(foreignTx?.amount).toBe(-189.0);
+    expect(foreignTx?.originalAmount).toBe(-189.0);
     expect(foreignTx?.originalCurrency).toBe('USD');
 
     // Check regular transactions
@@ -445,9 +445,9 @@ TOTAL DES DEPENSES
 
     // Check foreign currencies
     const usdTx = result.rawTransactions.find((tx) => tx.originalCurrency === 'USD');
-    expect(usdTx?.amount).toBe(-250.0);
+    expect(usdTx?.originalAmount).toBe(-250.0);
 
     const gbpTx = result.rawTransactions.find((tx) => tx.originalCurrency === 'GBP');
-    expect(gbpTx?.amount).toBe(-75.5);
+    expect(gbpTx?.originalAmount).toBe(-75.5);
   });
 });
