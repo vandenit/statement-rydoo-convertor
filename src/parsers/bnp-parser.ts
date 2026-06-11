@@ -428,7 +428,7 @@ export class BnpParser extends BaseParser {
       afterDate = cleaned.slice(fullDateMatch[0].length).trim();
       date = parseFrenchDate(dateStr);
     } else {
-      // 2. Try to extract short date (e.g., "04/02 05/02")
+    // 2. Try to extract short date (e.g., "04/02 05/02")
       const shortDateMatch = cleaned.match(BnpParser.SHORT_DATE_PATTERN);
 
       if (shortDateMatch) {
@@ -437,8 +437,8 @@ export class BnpParser extends BaseParser {
         let year = 2026; // Default to 2026 for this specific PDF set
         
         // Handle year wrap-around for statements spanning December/January
-        // If current date is early 2026 and we see a transaction in Dec, it's 2025
-        if (month > new Date().getMonth() + 1 + 6) {
+        // If current month is e.g. June (5) and we see a transaction in Dec (11), it's 2025
+        if (month > new Date().getMonth() + 1 + 2) {
            year = 2025;
         }
 
