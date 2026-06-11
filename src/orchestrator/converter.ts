@@ -33,12 +33,14 @@ export class StatementConverter {
       const buffer = fs.readFileSync(pdfPath);
       const pdfContent = await parsePdf(buffer);
       
-      // For now we only have BnpParser. In the future, we can add detection logic here.
+      // Identify transaction table boundaries
       const result = await bnpParser.parse(pdfContent);
       
       const calculatedTotal = result.rawTransactions.reduce((sum, t) => sum + t.amount, 0);
+      
+      const totalToValidate = calculatedTotal;
       const isValidTotal = result.statementTotal !== undefined 
-        ? Math.abs(calculatedTotal - result.statementTotal) < 0.01 
+        ? Math.abs(totalToValidate - result.statementTotal) < 0.01 
         : true;
 
       return {
@@ -47,7 +49,7 @@ export class StatementConverter {
         cardNumber: result.cardNumber,
         transactions: result.rawTransactions,
         statementTotal: result.statementTotal,
-        calculatedTotal,
+        calculatedTotal: totalToValidate,
         isValidTotal,
         success: true
       };

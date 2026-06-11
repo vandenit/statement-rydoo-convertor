@@ -108,8 +108,10 @@ export interface Transaction {
   date: Date;
   /** Merchant name/description */
   description: string;
-  /** Amount as number (negative for debits, positive for credits) */
+  /** Amount as number (negative for debits, positive for credits) - Always the billed EUR amount */
   amount: number;
+  /** Original amount for foreign transactions */
+  originalAmount?: number;
   /** Original currency code for foreign transactions (e.g., "USD") */
   originalCurrency?: string;
   /** Card number associated with this transaction */
