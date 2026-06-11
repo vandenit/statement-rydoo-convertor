@@ -35,6 +35,12 @@ export interface ParserResult {
   rawTransactions: Transaction[];
   /** Total amount as stated in the PDF (for validation) */
   statementTotal?: number;
+  /** Individual card current balance/total from detail section */
+  cardTotal?: number;
+  /** Previous balance from page 1 */
+  previousBalance?: number;
+  /** Payments/Domiciliations from page 1 */
+  domiciliation?: number;
   /** Full PDF text for debugging */
   rawText: string;
 }

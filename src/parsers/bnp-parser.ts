@@ -61,6 +61,11 @@ export class BnpParser extends BaseParser {
     'Résultat du compte',
   ];
 
+  // Specific markers for statement overview
+  private static readonly PREVIOUS_BALANCE_PATTERN = /Solde pr[ée]c[ée]dent du \d{2}\/\d{2}\/\d{4}\s+(-?[\d\s\.]*,\d{2})\s*€/i;
+  private static readonly DOMICILIATION_PATTERN = /Domiciliation\s+via\s+votre\s+banque\s+([\+\-]?[\d\s\.]*,\d{2})\s*€/i;
+  private static readonly SUB_TOTAL_PATTERN = /Sous-total\s+.*?\s+([\+\-]?[\d\s\.]*,\d{2})\s*€/i;
+
   // Date patterns for transactions
   private static readonly FULL_DATE_PATTERN = /^(\d{1,2}\s+[a-zéû]+\s+\d{4})/i;
   private static readonly SHORT_DATE_PATTERN = /^(\d{2})\/(\d{2})(?:\s+(\d{2})\/(\d{2}))?/;
@@ -120,6 +125,19 @@ export class BnpParser extends BaseParser {
 
     // Extract statement total
     const statementTotal = this.extractStatementTotal(text);
+    
+    const cleanText = text.replace(/\n/g, ' ');
+    
+    // Extract overview values for validation
+    const previousBalanceMatch = cleanText.match(BnpParser.PREVIOUS_BALANCE_PATTERN);
+    const previousBalance = previousBalanceMatch ? parseAmountWithCurrency(previousBalanceMatch[1])?.amount : undefined;
+    
+    const domiciliationMatch = cleanText.match(BnpParser.DOMICILIATION_PATTERN);
+    const domiciliation = domiciliationMatch ? parseAmountWithCurrency(domiciliationMatch[1])?.amount : undefined;
+
+    const cardTotalMatch = cleanText.match(BnpParser.SUB_TOTAL_PATTERN);
+    const cardTotal = cardTotalMatch ? parseAmountWithCurrency(cardTotalMatch[1])?.amount : undefined;
+
     // Extract transaction table text
     // BNP specific: Table can be split across pages. Pass the whole text but let the extractor handle markers.
     const tableText = text.substring(tableBounds.startIndex);
@@ -137,6 +155,9 @@ export class BnpParser extends BaseParser {
       cardNumber: cardInfo.lastFour,
       rawTransactions,
       statementTotal,
+      cardTotal,
+      previousBalance,
+      domiciliation,
       rawText: tableText, // Pass table section to Phase 3 for processing
     };
   }
@@ -344,15 +365,16 @@ export class BnpParser extends BaseParser {
         continue;
       }
 
-      // Try to parse this as a transaction line
-      // Pass potential next lines for lookahead
-      const parseResult = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
+    // Try to parse this as a transaction line
+    // Pass potential next lines for lookahead
+    const parseResult = this.parseTransactionLine(line, lines[i + 1], lines[i + 2]);
 
-      if (parseResult) {
-        transactions.push(parseResult.transaction);
-        i += parseResult.linesConsumed;
-        continue;
-      }
+    if (parseResult) {
+      const transaction = parseResult.transaction;
+      transactions.push(transaction);
+      i += parseResult.linesConsumed;
+      continue;
+    }
 
       i++;
     }

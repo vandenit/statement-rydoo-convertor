@@ -47,16 +47,17 @@ program
       const allTransactions = [];
       const cardNumbers = new Set<string>();
 
-      let grandTotal = 0;
+      let grandTotalActual = 0;
 
       for (const file of files) {
+        console.log(`[DEBUG] Processing file ${file}`);
         const filePath = path.join(inputPath, file);
         const result = await converter.convert(filePath);
         
         if (result.success) {
           allTransactions.push(...result.transactions);
           const fileTotal = result.calculatedTotal || 0;
-          grandTotal += fileTotal;
+          grandTotalActual += fileTotal;
 
           if (result.transactions.length > 0 && result.transactions[0].cardNumber) {
             cardNumbers.add(result.transactions[0].cardNumber);
@@ -95,12 +96,12 @@ program
       const cardSummary = Array.from(cardNumbers).join(', ') || 'Unknown';
       generator.generate(allTransactions, cardSummary, excelPath);
 
-      console.log('\n--- Summary ---');
+      console.log('--- Summary ---');
       console.log(`✅ Success! Generated: ${excelPath}`);
       console.log(`📊 Total transactions: ${allTransactions.length}`);
-      console.log(`💰 Grand Total: ${grandTotal.toFixed(2)} €`);
+      console.log(`💰 Grand Total: ${grandTotalActual.toFixed(2)} €`);
       console.log(`💳 Cards found: ${cardSummary}`);
-      console.log('----------------\n');
+      console.log('----------------');
 
     } catch (error) {
       console.error(`💥 Fatal error: ${error instanceof Error ? error.message : String(error)}`);
